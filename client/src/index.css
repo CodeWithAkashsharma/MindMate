@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  /* MindMate Colors */
+  --color-sage: #7C9E87;
+  --color-sage-light: #A8C4B0;
+  --color-sage-dark: #4A6B55;
+  --color-sage-pale: #EDF4EF;
+  
+  --color-lavender: #9B8EC4;
+  --color-lavender-light: #C4BCDF;
+  --color-lavender-pale: #F2F0F9;
+  
+  --color-blush: #C4847A;
+  --color-blush-pale: #FAF0EF;
+  
+  --color-amber: #C4A35A;
+  --color-amber-pale: #FAF6EC;
+  
+  --color-ink: #1A1F1C;
+  --color-ink-mid: #3D4840;
+  --color-ink-soft: #6B7A70;
+  --color-ink-muted: #A0ADA4;
+  
+  --color-paper: #FAFAF8;
+  --color-paper-warm: #F5F3EE;
+  --color-surface: #FFFFFF;
+
+  /* MindMate Fonts */
+  --font-serif: "DM Serif Display", serif;
+  --font-sans: "DM Sans", sans-serif;
+
+  /* MindMate Shadows */
+  --shadow-soft: 0 4px 24px rgba(74,107,85,0.08);
+  --shadow-card: 0 2px 16px rgba(26,31,28,0.06);
+
+
+  @keyframes scale-in {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  --animate-scale-in: scale-in 0.3s ease-out forwards;
+
+}
+/* Base Body Styles */
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+}
+
+
+
+
