@@ -11,7 +11,7 @@ const meditationRoutes = require('./routes/meditation');
 const DailySpark = require('./models/DailySpark');
 const dailySparks = require('./data/sparks');
 const sparkRoutes = require('./routes/sparkRoutes');
-
+const QuickAction= require('./routes/quickActions')
 
 const app = express();
 app.use(express.urlencoded({ extended: false }));
@@ -26,7 +26,7 @@ app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/sleep', sleepRoutes);
 app.use('/api/assessment', assessmentRoutes);
 app.use('/api/sparks', sparkRoutes);
-
+app.use('/api/quick-actions',QuickAction);
 
 const seedSparks = async () => {
   try {
