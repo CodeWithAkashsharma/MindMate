@@ -21,7 +21,14 @@ const userSchema = new mongoose.Schema(
       required: [true, 'Please add a password'],
       minlength: 6,
       select: false 
-    }
+    },
+    isDev: {
+    type: Boolean,
+    default: false 
+  },
+  sparkPoints: { type: Number, default: 0 },
+  sparkStreak: { type: Number, default: 0 },
+  lastSparkDate: { type: Date }
   },
   {
     timestamps: true

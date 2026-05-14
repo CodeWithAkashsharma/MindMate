@@ -10,6 +10,7 @@ import Mood from './pages/Mood';
 import Breathing from './pages/Breathing';
 import Meditation from './pages/Meditation'
 import SleepLog from './pages/SleepLog';
+import Assessment from './pages/Assessment';
 
 const token = localStorage.getItem('token');
 
@@ -22,22 +23,18 @@ function App() {
        <Route path="/" element={token ? <Navigate to="/dashboard" /> : <Landing />} />
         <Route path="/dashboard" element={<Layout> <Dashboard /></Layout> } />
 <Route path="/journal" element={<Layout><Journal /></Layout>} />
-        <Route path="/" element={<Layout><Dashboard /></Layout>} />
-        <Route path="/login" element={<Login />} />
+<Route path="/login" element={<Login />} />
 <Route path="/register" element={<Register />} />
 <Route path="/history" element={<History />} />
 <Route path="/mood" element={<Layout> <Mood/></Layout> } />
-<Route path="meditation" element={<Layout> <Meditation/></Layout> } />
+<Route path="/meditation" element={<Layout> <Meditation/></Layout> } />
 
 <Route path="/breathing" element={<Layout><Breathing/></Layout> } />
 <Route path="/sleep" element={<Layout><SleepLog/></Layout> } />
+<Route path="/SelfAssesment" element={<Layout><Assessment/></Layout> } />
                
                 
-               
-
-                {/* <Route path="/assessment" element={<Placeholder title="Self-Assessment" />} />
-                <Route path="/resources" element={<Placeholder title="Resources" />} />
-                <Route path="/insights" element={<Placeholder title="Insights & Reports" />} />  */}
+              
         
       </Routes>
     </BrowserRouter>

@@ -93,43 +93,39 @@ useEffect(() => {
   
 
 const handleComplete = async () => {
-    setIsActive(false); // Stop the visual timer
-    
-    // Calculate exact seconds practiced
-    const secondsPracticed = totalDuration - timeLeft;
-    
-    // Use Math.ceil so even a 5-second test counts as 1 minute
-    const durationEarned = Math.ceil(secondsPracticed / 60);
+  setIsActive(false); 
+  
+  const secondsPracticed = totalDuration - timeLeft;
+  const durationEarned = Math.ceil(secondsPracticed / 60);
 
-    // Only save and show toast if they actually let the timer run for > 0 seconds
-    if (secondsPracticed > 0) {
-      try {
-        const token = localStorage.getItem('token');
-        
-        await axios.post('http://localhost:5000/api/meditation/save', {
-          duration: durationEarned,
-        }, { 
-          headers: { Authorization: `Bearer ${token}` } 
-        });
+  if (secondsPracticed > 0) {
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Save session to backend
+      await axios.post('http://localhost:5000/api/meditation/save', {
+        duration: durationEarned,
+      }, { 
+        headers: { Authorization: `Bearer ${token}` } 
+      });
 
-        if (typeof fetchAnalytics === 'function') fetchAnalytics();
-        
-        // SHOW POPUP
-        setShowToast(true);
-        setTimeout(() => {
-          setShowToast(false);
-        }, 4000);
+      // --- THE KEY FIX ---
+      // Re-fetch analytics immediately after saving to update the UI
+      await fetchAnalytics(); 
+      
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 4000);
 
-      } catch (err) {
-        console.error("Cloud sync failed:", err);
-      }
-    } else {
-      // Optional: Log to console if they click save without starting the timer
-      console.log("Timer didn't run, nothing to save.");
+    } catch (err) {
+      console.error("Cloud sync failed:", err);
     }
-    
-    setTimeLeft(totalDuration); // Reset the clock
-  };
+  }
+  
+  setTimeLeft(totalDuration); 
+};
+
+
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -138,13 +134,13 @@ const handleComplete = async () => {
 
   const [analytics, setAnalytics] = useState({ dailyStats: [], totalTime: 0, avgSession: 0 });
 
-useEffect(() => {
   const fetchAnalytics = async () => {
     const res = await axios.get('http://localhost:5000/api/meditation/analytics', {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     });
     setAnalytics(res.data);
   };
+useEffect(() => {
   fetchAnalytics();
 }, []);
   const progress = ((totalDuration - timeLeft) / totalDuration) * 100;

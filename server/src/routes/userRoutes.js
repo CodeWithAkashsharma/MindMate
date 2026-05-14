@@ -7,4 +7,5 @@ const { protect } = require('../middleware/authMiddleware');
 // The frontend is specifically asking for /profile
 router.get('/profile', protect, getUserProfile);
 
+
 module.exports = router;
