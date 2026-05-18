@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { 
+   LifeBuoy 
+} from 'lucide-react';
+
+import LegalModal from '../components/LegalModal';
 
 export default function Layout({ children }) {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [modalType, setModalType] = useState(null); 
   
   // Combined user state to hold profile info + spark stats
   const [userData, setUserData] = useState({ 
@@ -40,6 +46,17 @@ export default function Layout({ children }) {
     "Every reflection is a step toward growth.",
     "How's the weather in your head today?"
   ];
+
+
+const [showCrisisModal, setShowCrisisModal] = useState(false);
+
+  const emergencyContacts = [
+    { name: "iCall (TISS)", sub: "Mon–Sat, 8am–10pm", phone: "9152987821" },
+    { name: "Vandrevala Foundation", sub: "Available 24/7", phone: "1860-2662-345" },
+    { name: "Emergency Services", sub: "Police, Fire, Ambulance", phone: "112" }
+  ];
+
+
 
 // Tell React to update memory every time you toggle the button
   useEffect(() => {
@@ -194,7 +211,10 @@ if (response.ok) {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('user'); 
+localStorage.removeItem('userInfo');
+  localStorage.removeItem('cachedAiSummary');
+  localStorage.removeItem('lastAiGeneration');
+    
     window.location.href = '/';
   };
 
@@ -269,9 +289,7 @@ if (response.ok) {
             <Link to="/meditation" onClick={closeSidebar} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${isActive('/meditation') ? 'bg-sage-pale text-sage-dark font-medium border-l-4 border-sage' : 'text-ink-soft hover:bg-sage-pale/50'}`}>
               <span className="opacity-70">🧘</span> Meditation
             </Link>
-            <Link to="/habits" onClick={closeSidebar} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${isActive('/habits') ? 'bg-sage-pale text-sage-dark font-medium border-l-4 border-sage' : 'text-ink-soft hover:bg-sage-pale/50'}`}>
-              <span className="opacity-70">✅</span> Habit Tracker
-            </Link>
+  
             <Link to="/sleep" onClick={closeSidebar} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${isActive('/sleep') ? 'bg-sage-pale text-sage-dark font-medium border-l-4 border-sage' : 'text-ink-soft hover:bg-sage-pale/50'}`}>
               <span className="opacity-70">🌙</span> Sleep Log
             </Link>
@@ -287,17 +305,43 @@ if (response.ok) {
               <span className="opacity-70">📈</span> Insights & Reports
             </Link>
           </nav>
+          
         </div>
 
+      
+
+   
         {/* LOGOUT */}
-        <div className="mt-auto pt-10">
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all group">
+        <div className="mt-auto px-4 pb-6 pt-4 flex flex-col gap-1 border-t border-gray-100 bg-white">
+    
+          {/* SOS Button */}
+          <button 
+            onClick={() => setShowCrisisModal(true)}
+            className="flex items-center gap-3 px-2 py-2 rounded-xl text-[#DC2626] hover:bg-[#FEF2F2] transition-colors w-full group"
+          >
+            <LifeBuoy size={18} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
+            <span className="text-[13px] font-semibold tracking-wide">Emergency Help</span>
+          </button>
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all group">
             <svg className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
             Logout
           </button>
+          {/* Option 2: The Block Footer */}
+<div className="mt-6 p-3 mx-auto -my-5 w-full rounded-xl text-center">
+            <div className="flex justify-center gap-4 text-xs font-medium text-gray-400">
+              <button onClick={() => setModalType('privacy')} className="hover:text-ink transition-colors">Privacy</button>
+              <button onClick={() => setModalType('terms')} className="hover:text-ink transition-colors">Terms</button>
+              <button onClick={() => setModalType('support')} className="hover:text-ink transition-colors">Support</button>
+            </div>
+            <p className="text-[10px] text-gray-400 mt-1.5 font-light">MindMate v1.0</p>
+          </div>
         </div>
+        
+        
+
+  
       </aside>
 
       {/* MAIN CONTENT AREA */}
@@ -340,7 +384,17 @@ if (response.ok) {
         <main className="p-4 lg:p-8 flex-1 overflow-x-hidden">
           {children}
         </main>
+       
       </div>
+
+      
+{/* The Global Modal Instance */}
+      <LegalModal 
+        isOpen={modalType !== null} 
+        type={modalType} 
+        onClose={() => setModalType(null)} 
+      />
+
 
       {/* DAILY SPARK MODAL */}
       {showSpark && (
@@ -393,6 +447,83 @@ if (response.ok) {
     
   </div>
 )}
+
+{/* 🔥 MODERN, SOFT CRISIS MODAL */}
+      {showCrisisModal && (
+        <div className="fixed inset-0 z-[100] bg-[#1A1F1C]/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
+          
+          {/* Changed 'rounded-none' to 'rounded-[32px]' and removed the top red border */}
+          <div className="bg-white rounded-[32px] w-full max-w-lg shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] relative flex flex-col max-h-[90vh] overflow-hidden border border-gray-100">
+            
+            {/* Header Section: Soft gradient instead of harsh red line */}
+            <div className="p-6 sm:p-8 pb-6 bg-gradient-to-b from-red-50/50 to-white">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-red-100 text-red-600 p-2 rounded-xl shadow-sm">
+                   <LifeBuoy size={24} strokeWidth={2.5} className="animate-pulse" />
+                </div>
+                <h2 className="text-2xl font-serif text-[#1A1F1C]">Crisis Support</h2>
+              </div>
+              <p className="text-sm text-gray-500 leading-relaxed">
+                You are not alone. If you or someone you know is in immediate danger, please reach out. Help is available 24/7.
+              </p>
+            </div>
+
+            {/* Scrollable Numbers List */}
+            <div className="overflow-y-auto px-6 sm:px-8 pb-6 space-y-3">
+              {emergencyContacts.map((contact, idx) => (
+                <a 
+                  key={idx} 
+                  href={`tel:${contact.phone.replace(/-/g, '')}`}
+                  // Smooth rounded-2xl borders for the cards
+                  className={`block rounded-2xl border p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md group ${
+                    contact.isPrimary 
+                      ? 'bg-[#FEF2F2] border-[#FCA5A5] hover:bg-[#FEE2E2]' 
+                      : 'bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex justify-between items-center gap-4">
+                    <div>
+                      <div className={`font-bold text-sm ${contact.isPrimary ? 'text-[#991B1B]' : 'text-[#1A1F1C]'}`}>
+                        {contact.name}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">{contact.sub}</div>
+                    </div>
+                    <div className={`font-mono text-lg font-bold tracking-tight shrink-0 transition-transform group-hover:scale-105 ${contact.isPrimary ? 'text-[#DC2626]' : 'text-[#1A1F1C]'}`}>
+                      {contact.phone}
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+
+            {/* Footer Action Buttons */}
+            <div className="p-6 sm:p-8 pt-4 bg-white flex gap-3 sm:gap-4 border-t border-gray-50">
+              <button 
+                onClick={() => setShowCrisisModal(false)}
+                // Rounded buttons to match the modal shape
+                className="flex-1 bg-[#4A6B55] hover:bg-[#3A5543] text-white py-4 px-4 rounded-2xl font-bold tracking-wide text-xs transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
+              >
+                I'm Safe, Close
+              </button>
+              
+              <a 
+                href="/resources"
+                onClick={() => setShowCrisisModal(false)}
+                className="flex-1 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-[#1A1F1C] py-4 px-4 rounded-2xl font-bold tracking-wide text-xs text-center transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 flex items-center justify-center"
+              >
+                More Resources
+              </a>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+
+
     </div>
+
+    
   );
+  
 }

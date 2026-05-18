@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "client": "cd client && npm run dev",
-  "server": "cd server && nodemon server.js",
-  "mindmate": "concurrently \"npm run server\" \"npm run client\""
-},
+    "client": "cd client && npm run dev",
+    "server": "cd server && nodemon server.js",
+    "mindmate": "concurrently \"npm run server\" \"npm run client\""
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CodeWithAkashsharma/MindMate.git"
@@ -23,5 +23,9 @@
   "devDependencies": {
     "concurrently": "^9.2.1",
     "nodemon": "^3.1.14"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "lucide-react": "^1.16.0"
   }
 }

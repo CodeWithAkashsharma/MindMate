@@ -10,7 +10,7 @@ const defaultActions = [
   { id: 2, icon: "🎵", title: "Music", done: false },
  { id: 3, icon: "🍎", title: "Healthy Bite", done: false },
   { id: 4, icon: "🚶", title: "Walk", done: false },
-   { id: 5, icon: "📵", title: "Pause", done: true },
+   { id: 5, icon: "📵", title: "Pause", done: false },
    { id: 6, icon: "☀️", title: "Sunlight", done: false }
 ];
 

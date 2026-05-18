@@ -135,16 +135,23 @@ export default function Assessment() {
 
   const showToastMsg = (type, message, desc) => {
     setToast({ show: true, type, message, desc });
-    setTimeout(() => setToast({ show: false, type: '', message: '', desc: '' }), 4000);
+    
+    // Smooth exit logic: Trigger fade out, THEN clear the DOM completely
+    setTimeout(() => {
+      setToast(prev => ({ ...prev, show: false })); // Trigger opacity fade
+      setTimeout(() => {
+        setToast({ show: false, type: '', message: '', desc: '' }); // Unmount from DOM
+      }, 500); // 500ms matches the 'duration-500' CSS class
+    }, 4000);
   };
 
   const handleCrisisAction = (type) => {
-  // Logic to track that help was sought (important for clinical audit logs)
-  console.log(`User initiated ${type} to 988 Helpline`);
-  
-  // Optional: Show a supportive toast while the phone app opens
-  showToastMsg('success', 'Connecting...', 'Opening your phone app to reach support.');
-};
+    // Logic to track that help was sought (important for clinical audit logs)
+    console.log(`User initiated ${type} to 988 Helpline`);
+    
+    // Optional: Show a supportive toast while the phone app opens
+    showToastMsg('success', 'Connecting...', 'Opening your phone app to reach support.');
+  };
 
 
   // --- 2. SAVE DATA TO BACKEND ---
@@ -244,22 +251,24 @@ export default function Assessment() {
         </div>
       ) : (
         <>
-          {/* --- DYNAMIC TOAST POPUP --- */}
-          <div 
-            className={`fixed top-8 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 ease-out ${
-              toast.show ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0 pointer-events-none'
-            }`}
-          >
-            <div className="bg-[#1A1F1C] text-white px-5 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-[#7C9E87]/30 min-w-[300px]">
-              <div className={`p-2 rounded-full ${toast.type === 'error' ? 'bg-rose-500/20 text-rose-400' : 'bg-[#7C9E87]/20 text-[#7C9E87]'}`}>
-                {toast.type === 'error' ? <AlertTriangle size={18} strokeWidth={3} /> : <Check size={18} strokeWidth={3} />}
-              </div>
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-widest text-white">{toast.message}</p>
-                <p className="text-[10px] text-gray-400 mt-0.5 tracking-wide">{toast.desc}</p>
+          {/* --- DYNAMIC TOAST POPUP (Wrapped conditionally to fix flash bug) --- */}
+          {toast.message && (
+            <div 
+              className={`fixed top-8 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 ease-out ${
+                toast.show ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0 pointer-events-none'
+              }`}
+            >
+              <div className="bg-[#1A1F1C] text-white px-5 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-[#7C9E87]/30 min-w-[300px]">
+                <div className={`p-2 rounded-full ${toast.type === 'error' ? 'bg-rose-500/20 text-rose-400' : 'bg-[#7C9E87]/20 text-[#7C9E87]'}`}>
+                  {toast.type === 'error' ? <AlertTriangle size={18} strokeWidth={3} /> : <Check size={18} strokeWidth={3} />}
+                </div>
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-widest text-white">{toast.message}</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5 tracking-wide">{toast.desc}</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <header className="mb-8 flex justify-between items-end">
             <div>

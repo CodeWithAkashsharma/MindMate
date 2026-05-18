@@ -11,6 +11,8 @@ import Breathing from './pages/Breathing';
 import Meditation from './pages/Meditation'
 import SleepLog from './pages/SleepLog';
 import Assessment from './pages/Assessment';
+import Resources from './pages/Resources';
+import Insights from './pages/Insights';
 
 const token = localStorage.getItem('token');
 
@@ -32,6 +34,8 @@ function App() {
 <Route path="/breathing" element={<Layout><Breathing/></Layout> } />
 <Route path="/sleep" element={<Layout><SleepLog/></Layout> } />
 <Route path="/SelfAssesment" element={<Layout><Assessment/></Layout> } />
+<Route path="/Resources" element={<Layout><Resources/></Layout> } />
+<Route path="/Insights" element={<Layout><Insights/></Layout> } />
                
                 
               

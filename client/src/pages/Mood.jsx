@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios'; // 🔥 Make sure to import axios!
 
 export default function Mood() {
   const [score, setScore] = useState(8);
@@ -19,153 +20,112 @@ export default function Mood() {
     { name: 'Hope', emoji: '✨' }
   ];
 
-  const average =
-  history.length > 0
-    ? (
-        history.reduce((acc, item) => acc + item.score, 0) /
-        history.length
-      ).toFixed(1)
+  // 🔥 FIXED MATH: True averages and true max/min limits
+  const average = history.length > 0
+    ? (history.reduce((acc, item) => acc + item.score, 0) / history.length).toFixed(1)
     : 0;
 
-const bestDay =
-  history.length > 0
-    ? (
-        (
-          Math.max(...history.map((m) => m.score)) +
-          history.reduce((acc, item) => acc + item.score, 0) /
-            history.length
-        ) / 2
-      ).toFixed(1)
+  const bestDay = history.length > 0
+    ? Math.max(...history.map((m) => m.score)).toFixed(1)
     : 0;
 
-const lowest =
-  history.length > 0
-    ? (
-        (
-          Math.min(...history.map((m) => m.score)) +
-          history.reduce((acc, item) => acc + item.score, 0) /
-            history.length
-        ) / 2
-      ).toFixed(1)
+  const lowest = history.length > 0
+    ? Math.min(...history.map((m) => m.score)).toFixed(1)
     : 0;
 
-const consistency =
-  history.length > 1
-    ? `${Math.round(
-        (
-          history.reduce((acc, item) => acc + item.score, 0) /
-          (history.length * 10)
-        ) * 100
-      )}%`
+  const consistency = history.length > 1
+    ? `${Math.round((history.reduce((acc, item) => acc + item.score, 0) / (history.length * 10)) * 100)}%`
     : "0%";
 
-const insights = [
-  { label: 'Average', val: average, max: 10 },
-  { label: 'Best Day', val: bestDay, max: 10 },
-  { label: 'Lowest', val: lowest, max: 10 },
-  {
-    label: 'Consistency',
-    val: consistency,
-    max: 100
-  }
-];
+  const insights = [
+    { label: 'Average', val: average, max: 10 },
+    { label: 'Best Day', val: bestDay, max: 10 },
+    { label: 'Lowest', val: lowest, max: 10 },
+    { label: 'Consistency', val: consistency, max: 100 }
+  ];
 
   useEffect(() => {
     fetchMoodHistory();
   }, []);
 
+  // 🔥 UPGRADED FETCH LOGIC USING AXIOS
   const fetchMoodHistory = async () => {
     const token = localStorage.getItem('token');
-
     try {
-      const response = await fetch('http://localhost:5000/api/moods', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await axios.get('http://localhost:5000/api/moods', {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      const data = await response.json();
+      console.log("🔥 Backend Data Received:", response.data); // Look in your browser console!
 
+      let moodsArray = [];
+      const data = response.data;
 
-      if (response.ok) {
+      // Extract the array no matter how the backend wraps it
+      if (Array.isArray(data)) moodsArray = data;
+      else if (Array.isArray(data.moods)) moodsArray = data.moods;
+      else if (Array.isArray(data.data)) moodsArray = data.data;
+      else if (Array.isArray(data.history)) moodsArray = data.history;
 
-        let moodsArray = [];
-
-        if (Array.isArray(data)) {
-          moodsArray = data;
-        } else if (Array.isArray(data.moods)) {
-          moodsArray = data.moods;
-        } else if (Array.isArray(data.data)) {
-          moodsArray = data.data;
-        } else if (Array.isArray(data.history)) {
-          moodsArray = data.history;
-        }
-
-        setHistory(moodsArray.slice(-14));
-      }
+      // Make sure we sort it correctly so the newest items are at the end for the graph!
+      moodsArray.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      
+      setHistory(moodsArray.slice(-14));
 
     } catch (err) {
-      console.error("Error fetching mood history:", err);
+      console.error("🚨 Error fetching mood history:", err.response?.data || err.message);
     }
   };
 
-const handleSaveMood = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  const token = localStorage.getItem('token');
+  const handleSaveMood = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const token = localStorage.getItem('token');
 
-  try {
-    const response = await fetch('http://localhost:5000/api/moods', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ score, emotions: selectedEmotions, notes })
-    });
+    try {
+      await axios.post('http://localhost:5000/api/moods', 
+        { score, emotions: selectedEmotions, notes },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    if (response.ok) {
       setNotes('');
       setSelectedEmotions([]);
-      fetchMoodHistory();
       
-      // Trigger the Success Popup
+      // Re-fetch history so the graph updates instantly!
+      await fetchMoodHistory();
+      
       setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000); // Hide after 3 seconds
+      setTimeout(() => setShowSuccess(false), 3000);
+    } catch (err) {
+      console.error("Failed to save mood:", err);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error("Failed to save mood:", err);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
   const handleEmotionToggle = (name) => {
     setSelectedEmotions((prev) =>
-      prev.includes(name)
-        ? prev.filter((e) => e !== name)
-        : [...prev, name]
+      prev.includes(name) ? prev.filter((e) => e !== name) : [...prev, name]
     );
   };
 
   const generatePath = () => {
-    if (!history || history.length < 2) {
-      return '';
-    }
+    if (!history || history.length < 2) return '';
 
     const width = 300;
     const height = 120;
-
     let path = '';
 
     history.forEach((m, i) => {
       const x = (i / (history.length - 1)) * width;
       const y = height - ((m.score || 0) / 10) * height;
-
       path += `${i === 0 ? 'M' : 'L'} ${x} ${y} `;
     });
 
     return path;
   };
+
+  // ... keep your existing return() statement exactly the same! ...
 
  return (
   <div className="min-h-screen bg-[#FAFAF8] p-2 sm:p-4 md:p-6 lg:p-8">
@@ -445,12 +405,12 @@ const handleSaveMood = async (e) => {
                     }`}
                   />
 
-                  <span className="text-[8px] sm:text-[9px] font-bold text-[#A0ADA4] mt-2 uppercase">
-                    {new Date(m.createdAt).toLocaleDateString(
-                      'en-IN',
-                      { weekday: 'narrow' }
-                    )}
-                  </span>
+                  {/* Show only the numeric day */}
+  <span className="text-[8px] sm:text-[9px] font-bold text-[#A0ADA4] mt-2 uppercase">
+    {new Date(m.createdAt).toLocaleDateString('en-IN', { 
+      day: 'numeric' // <--- Only ask for the day!
+    })}
+  </span>
                 </div>
               ))}
             </div>

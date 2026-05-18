@@ -89,6 +89,20 @@ const [analytics, setAnalytics] = useState({
   }, []);
 
 
+
+// --- DYNAMIC CHART DATES ---
+  const currentMonthYear = new Date().toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric'
+  }).toUpperCase();
+
+  const last14Days = [...Array(14)].map((_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (13 - i));
+    return d.getDate(); 
+  });
+
+
   return (
     <div className="max-w-[1400px] mx-auto p-4 sm:p-6 lg:p-8 animate-in fade-in duration-1000">
       
@@ -227,62 +241,64 @@ const [analytics, setAnalytics] = useState({
 </button>
         </div>
 
-        {/* --- RIGHT: PROFESSIONAL HISTORY & MATTE STATS --- */}
-        <div className="xl:col-span-5 space-y-6">
-          
-        {/* CHART AREA */}
-{/* --- RIGHT: PROFESSIONAL HISTORY & MATTE STATS --- */}
+    {/* --- RIGHT: PROFESSIONAL HISTORY & MATTE STATS --- */}
 <div className="xl:col-span-5 space-y-6">
   
-  {/* 1. CHART CONTAINER (This white box was missing!) */}
-  <div className="bg-white rounded-[40px] border rounded-[40px] bg-white/10 backdrop-blur-2xl border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.05)] p-8 ">
-    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-8">14-Day Trajectory</h3>
+  {/* 1. CHART CONTAINER */}
+  <div className="rounded-[40px] bg-white/10 backdrop-blur-2xl border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.05)] p-8">
     
-    {/* THE FIX: 'h-32' (height) and 'items-end' (align to bottom) are crucial here */}
-    <div className="flex items-end justify-between h-32 gap-1.5 px-2 relative">
+    {/* HEADER WITH DYNAMIC MONTH/YEAR */}
+    <div className="flex justify-between items-center mb-8">
+      <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">14-Day Trajectory</h3>
+      <span className="text-[9px] font-bold uppercase tracking-widest text-[#7C9E87] bg-[#7C9E87]/10 px-3 py-1 rounded-full border border-[#7C9E87]/10">
+        {currentMonthYear}
+      </span>
+    </div>
+    
+    {/* GRAPH AREA - Increased height slightly to fit dates perfectly */}
+    <div className="flex items-end justify-between h-36 gap-1.5 px-2 relative">
       
       {/* Subtle background grid lines */}
-      <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20">
+      <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20 pb-6">
         <div className="border-t border-dashed border-gray-300 w-full"></div>
         <div className="border-t border-dashed border-gray-300 w-full"></div>
         <div className="border-t border-dashed border-gray-300 w-full"></div>
       </div>
 
-      {/* Dynamic Graph Bars */}
+      {/* Dynamic Graph Bars using your analytics state */}
       {analytics?.dailyStats?.map((hoursSlept, i) => {
-        // Calculate height based on a 10-hour goal (e.g., 8.3h = 83% height)
+        // Calculate height based on a 10-hour goal
         const heightPercent = Math.min((hoursSlept / 10) * 100, 100);
         
         return (
-          <div key={i} className="flex-1 group relative h-full flex items-end ">
+          <div key={i} className="flex-1 group relative h-full flex flex-col items-center justify-end z-10">
+            
+            {/* Tooltip */}
+            {hoursSlept > 0 && (
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#1A1F1C] text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-20 font-bold tracking-wider whitespace-nowrap">
+                {hoursSlept}h
+              </div>
+            )}
+
+            {/* The Bar */}
             <div 
               style={{ height: `${heightPercent}%`, minHeight: hoursSlept > 0 ? '10%' : '0%' }} 
               className={`w-full rounded-t-md transition-all duration-700 cursor-pointer ${
                 hoursSlept >= 7 ? 'bg-[#7C9E87]' : hoursSlept > 4 ? 'bg-[#7C9E87]/50' : 'bg-gray-200'
               } hover:bg-[#1A1F1C] hover:scale-x-110`}
-            >
-              {/* Tooltip */}
-              {hoursSlept > 0 && (
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#1A1F1C] text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 font-bold tracking-wider whitespace-nowrap">
-                  {hoursSlept}h
-                </div>
-              )}
-            </div>
+            ></div>
+
+            {/* 🔥 NEW DYNAMIC DATE LABEL */}
+            <span className="mt-2 text-[9px] font-bold text-gray-400 group-hover:text-[#1A1F1C] transition-colors">
+              {last14Days[i]}
+            </span>
           </div>
         );
       })}
     </div>
-    
-    <div className="flex justify-between mt-6 px-2 text-[9px] font-black text-gray-400 uppercase tracking-widest">
-      <span>Week 1</span>
-      <span>Week 2</span>
-    </div>
   </div>
 
-  {/* 2. MATTE BENTO STATS */}
- 
-</div>
-
+  {/* 2. MATTE BENTO STATS AREA ... (keep your existing stats grid here) ... */}
 {/* MATTE BENTO STATS AREA */}
 {/* OUTER GLASS CONTAINER */}
 <div className="relative p-6 sm:p-8 rounded-[40px] bg-white/10 backdrop-blur-2xl border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.05)] overflow-hidden">  
