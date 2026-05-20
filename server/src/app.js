@@ -14,6 +14,8 @@ const sparkRoutes = require('./routes/sparkRoutes');
 const QuickAction= require('./routes/quickActions')
 const insightsRoutes = require('./routes/insightsRoutes');
 
+const otpRoutes = require('./routes/otpRoutes')
+
 const app = express();
 app.use(express.urlencoded({ extended: false }));
 app.use(cors())
@@ -29,7 +31,7 @@ app.use('/api/assessment', assessmentRoutes);
 app.use('/api/sparks', sparkRoutes);
 app.use('/api/quick-actions',QuickAction);
 app.use('/api/insights', insightsRoutes);
-
+app.use('/api/otp', otpRoutes);
 const seedSparks = async () => {
   try {
     const count = await DailySpark.countDocuments();

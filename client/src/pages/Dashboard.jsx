@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-
+import axios from 'axios';
+import { Sparkles, ArrowRight, BrainCircuit } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 import QuickActionWidget from '../components/QuickActionWidget';
@@ -9,8 +10,9 @@ import QuickActionWidget from '../components/QuickActionWidget';
 
 
 export default function Dashboard() {
-
+const location = useLocation();
   // --- AFFIRMATIONS LOGIC ---
+
 
   const affirmations = [
 
@@ -44,7 +46,13 @@ const [userData, setUserData] = useState({
 
   });
   const [devLoading, setDevLoading] = useState(false);
+const [suggestion, setSuggestion] = useState({ text: "", actionType: "meditation" });
+  const [loading, setLoading] = useState(true);
+  
 
+  
+  
+  
   const handleDevSparkClick = async () => {
     setDevLoading(true);
     try {
@@ -69,6 +77,72 @@ const [userData, setUserData] = useState({
 
 
 
+useEffect(() => {
+    const fetchDashboardTip = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        
+        const resData = await axios.get('http://localhost:5000/api/insights/weekly', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        const currentUserId = resData.data.userId;
+        const sugKey = `cachedAiSuggestionObj_${currentUserId}`;
+        const timeKey = `lastSuggestionGenTime_${currentUserId}`;
+        
+        const cachedTip = localStorage.getItem(sugKey);
+        const lastGen = localStorage.getItem(timeKey);
+        
+        if (cachedTip && lastGen && (Date.now() - parseInt(lastGen) < 24 * 60 * 60 * 1000)) {
+          setSuggestion(JSON.parse(cachedTip));
+          setLoading(false);
+          return;
+        }
+
+        const productivity = resData.data.wellnessBreakdown.find(b => b.label === "Productivity")?.score || 0;
+        const sleep = resData.data.wellnessBreakdown.find(b => b.label === "Sleep")?.score || 0;
+        const mindfulness = resData.data.wellnessBreakdown.find(b => b.label === "Mindfulness")?.score || 0;
+
+        const tipRes = await axios.post('http://localhost:5000/api/insights/dashboard-tip', {
+          avgMood: resData.data.kpis.avgMood,
+          productivityScore: productivity,
+          sleepScore: sleep,
+          mindfulnessScore: mindfulness
+        }, { headers: { Authorization: `Bearer ${token}` } });
+
+        localStorage.setItem(sugKey, JSON.stringify(tipRes.data));
+        localStorage.setItem(timeKey, Date.now().toString());
+        setSuggestion(tipRes.data);
+        setLoading(false);
+
+      } catch (err) {
+        console.error(err);
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardTip();
+  }, []);
+
+  // Helper function to dynamically map buttons based on AI actionType
+  const getButtonAction = () => {
+    switch (suggestion.actionType) {
+      case 'meditation':
+        return { label: 'Start Meditation Session', path: '/meditation' };
+      case 'journal':
+        return { label: 'Open Reflection Journal', path: '/journal' };
+      case 'sleep':
+        return { label: 'Log Sleep Metrics', path: '/sleep' };
+      case 'mood':
+        return { label: 'Check-In Daily Mood', path: '/mood' };
+      default:
+        return { label: 'Explore Insights', path: '/insights' };
+    }
+  };
+
+  const action = getButtonAction();
+
+  
   // 2. Add the fetch logic
 
   useEffect(() => {
@@ -169,7 +243,7 @@ const [userData, setUserData] = useState({
 
 
 
-  const location = useLocation();
+
 
 
 
@@ -183,7 +257,7 @@ const [userData, setUserData] = useState({
 
   });
 
-  const [loading, setLoading] = useState(true);
+
 
 
 
@@ -671,48 +745,53 @@ const toggleTask = (id) => {
 </div>
 
 
-          {/* AI INSIGHT CARD */}
 
-          <div className="bg-gradient-to-br from-sage-pale to-lavender-pale p-5 md:p-6 rounded-2xl border border-white shadow-soft relative overflow-hidden group transition-all duration-500 hover:shadow-card cursor-default">
+    <div className="w-full bg-white border border-[#E9EFEA] rounded-2xl p-6 md:p-8 shadow-[0_4px_20px_-4px_rgba(74,107,85,0.05)] flex flex-col items-start gap-5 hover:shadow-[0_6px_24px_-4px_rgba(74,107,85,0.08)] transition-all duration-300 relative overflow-hidden group">
+      
+      {/* Decorative accent top boundary line */}
+      <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-emerald-600/20 via-[#4A6B55] to-amber-500/20" />
 
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/50 rounded-full blur-2xl -mr-10 -mt-10 transition-transform duration-1000 group-hover:scale-150"></div>
-
-            <div className="relative z-10 flex flex-col gap-3">
-
-              <div className="flex items-center gap-2">
-
-                <span className="text-xl group-hover:animate-bounce">✨</span>
-
-                <h3 className="font-serif text-lg md:text-xl text-ink">AI Insight</h3>
-
-              </div>
-
-              <p className="text-sm text-ink-soft leading-relaxed max-w-xl">
-
-                I noticed your recent journal entries have been focused on project deadlines. Would you like to do a quick reflection to decompress?
-
-              </p>
-
-              <div className="flex flex-wrap gap-2 md:gap-3 mt-2">
-
-                <button className="px-4 py-2 bg-white text-sage-dark text-xs md:text-sm font-medium rounded-lg shadow-sm hover:scale-105 active:scale-95 transition-all border border-sage-light/30">
-
-                  Chat with MindMate
-
-                </button>
-
-                <button className="px-4 py-2 text-ink-soft text-xs md:text-sm font-medium hover:bg-white/50 rounded-lg transition-colors active:scale-95">
-
-                  Not right now
-
-                </button>
-
-              </div>
-
-            </div>
-
+      {/* Header Row */}
+      <div className="flex items-center justify-between w-full">
+        <div className="flex items-center gap-2.5 text-[#2C3E35]">
+          <div className="p-1.5 bg-[#F4F8F5] rounded-lg text-[#4A6B55]">
+            <BrainCircuit size={18} className="animate-pulse" />
           </div>
+          <span className="text-[12px] uppercase tracking-wider font-bold text-gray-400">
+           MindMate AI 
+          </span>
+        </div>
+        <div className="flex items-center gap-1 text-[11px] font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
+          <Sparkles size={11} /> 
+          Just For You
+        </div>
+      </div>
+      
+      {/* Dynamic Content Text Area */}
+      <p className="text-[14px] md:text-[15px] text-[#4A5550] font-normal leading-relaxed max-w-4xl tracking-wide">
+        {suggestion.text || "Your ecosystem metrics look balanced today. Maintain your regular check-ins to stay consistently tracked across your timeline."}
+      </p>
+      
+      {/* Actionable Button Array */}
+      <div className="flex flex-wrap items-center gap-4 mt-1 w-full border-t border-gray-50 pt-4">
+        <button 
+          onClick={() => window.location.href = action.path} 
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#4A6B55] hover:bg-[#3D5946] active:scale-[0.98] rounded-xl text-xs font-bold text-white shadow-sm transition-all duration-200"
+        >
+          {action.label}
+          <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+        </button>
+        
+        <button 
+          onClick={() => window.location.href = '/insights'}
+          className="px-5 py-2.5 bg-[#F4F8F5] hover:bg-[#EAF1EC] text-xs font-bold text-[#4A6B55] rounded-xl transition-colors duration-200"
+        >
+          View Full Breakdown
+        </button>
+      </div>
 
+    </div>
+  
 
 
           {/* RECENT ENTRIES (Hollow-Fix Version) */}
@@ -1082,6 +1161,9 @@ Mood Activity
 
 
       </div>
+
+
+
 
     </div>
 

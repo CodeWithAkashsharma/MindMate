@@ -155,3 +155,39 @@ const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
     res.status(500).json({ error: "Failed to generate AI reflections." });
   }
 };
+
+
+
+exports.generateDashboardSuggestions = async (req, res) => {
+  try {
+    const { avgMood, productivityScore, sleepScore, mindfulnessScore } = req.body;
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
+
+    const prompt = `
+      You are MindMate, a concise health AI assistant. Analyze these metrics:
+      - Mood: ${avgMood}/10, Productivity: ${productivityScore}%, Sleep: ${sleepScore}%, Mindfulness: ${mindfulnessScore}%
+      
+      Identify the weakest metric. Write exactly one clear, precise, and highly actionable recommendation for today. Do not explain why. Keep it under 20 words total.
+
+      Return a strict JSON object with exactly two keys:
+      {
+        "text": "Your short recommendation here.",
+        "actionType": "meditation" (or "journal", "sleep", "mood")
+      }
+    `;
+
+    const result = await model.generateContent(prompt);
+    const cleanJsonString = result.response.text().replace(/```json|```/g, "").trim();
+    const parsedData = JSON.parse(cleanJsonString);
+
+    res.status(200).json(parsedData);
+  } catch (err) {
+    console.error(err);
+    res.status(200).json({ 
+      text: "Mindfulness is your weakest metric. Try a 5-minute guided meditation right now.",
+      actionType: "meditation"
+    });
+  }
+};

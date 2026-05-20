@@ -7,4 +7,5 @@ const {protect} = require('../middleware/AuthMiddleware'); // Make sure this mat
 // GET /api/insights/weekly
 router.get('/weekly', protect , insightsController.getWeeklyInsights);
 router.post('/generate-ai', protect, insightsController.generateAiSummary);
+router.post('/dashboard-tip', protect, insightsController.generateDashboardSuggestions)
 module.exports = router;

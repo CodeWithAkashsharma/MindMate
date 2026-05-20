@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
-   LifeBuoy 
+    LifeBuoy 
 } from 'lucide-react';
 
 import LegalModal from '../components/LegalModal';
+import ProfileModal from '../components/ProfileModal'; // 👈 Verified import is ready!
 
 export default function Layout({ children }) {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [modalType, setModalType] = useState(null); 
+  const [modalType, setModalType] = useState(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false); // 👈 Controls the modal visibility
   
   // Combined user state to hold profile info + spark stats
   const [userData, setUserData] = useState({ 
@@ -18,7 +20,7 @@ export default function Layout({ children }) {
     sparkPoints: 0, 
     sparkStreak: 0, 
     lastSparkDate: null,
-    isDev: false // Added to track dev status
+    isDev: false 
   });
   
   const [greeting, setGreeting] = useState("");
@@ -28,7 +30,7 @@ export default function Layout({ children }) {
   const [showSpark, setShowSpark] = useState(false);
   const [currentSparkTask, setCurrentSparkTask] = useState("Loading your mindful task...");
   
-// Tell React to check memory FIRST, otherwise default to false
+  // Tell React to check memory FIRST, otherwise default to false
   const [devMode, setDevMode] = useState(() => {
     return localStorage.getItem('mindmate_devMode') === 'true';
   });
@@ -47,8 +49,7 @@ export default function Layout({ children }) {
     "How's the weather in your head today?"
   ];
 
-
-const [showCrisisModal, setShowCrisisModal] = useState(false);
+  const [showCrisisModal, setShowCrisisModal] = useState(false);
 
   const emergencyContacts = [
     { name: "iCall (TISS)", sub: "Mon–Sat, 8am–10pm", phone: "9152987821" },
@@ -56,9 +57,7 @@ const [showCrisisModal, setShowCrisisModal] = useState(false);
     { name: "Emergency Services", sub: "Police, Fire, Ambulance", phone: "112" }
   ];
 
-
-
-// Tell React to update memory every time you toggle the button
+  // Tell React to update memory every time you toggle the button
   useEffect(() => {
     localStorage.setItem('mindmate_devMode', devMode);
   }, [devMode]);
@@ -73,13 +72,12 @@ const [showCrisisModal, setShowCrisisModal] = useState(false);
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        // 🔥 SEND DEV MODE FLAG TO BACKEND
         body: JSON.stringify({ devMode }) 
       });
-if (response.ok) {
+
+      if (response.ok) {
         const data = await response.json();
         
-        // 1. Update Layout's own memory
         setUserData(prev => ({
           ...prev,
           sparkPoints: data.points,
@@ -87,14 +85,12 @@ if (response.ok) {
           lastSparkDate: new Date().toISOString()
         }));
         
-        // 🔥 2. THE LOUD BROADCAST: Tell the Dashboard exactly what the new numbers are!
         const syncEvent = new CustomEvent('FORCE_DASHBOARD_UPDATE', {
           detail: { points: data.points, streak: data.streak }
         });
         window.dispatchEvent(syncEvent);
         console.log("📢 Layout Broadcasted New Points:", data.points);
 
-        // 3. Shuffle Dev Mode Task
         if (devMode) {
           const sparkRes = await fetch(`http://localhost:5000/api/sparks/today?devMode=true`, { 
             headers: { 'Authorization': `Bearer ${token}` } 
@@ -111,7 +107,19 @@ if (response.ok) {
       console.error("Spark sync failed:", err);
       setShowSpark(false);
     }
-  };
+  }; 
+  
+  // --- SYNC STATE LISTENER FOR INSTANT SIDEBAR CONVERSION ---
+  useEffect(() => {
+    const handleNameSync = (e) => {
+      setUserData(prev => ({ ...prev, name: e.detail.name }));
+    };
+
+    window.addEventListener('PROFILE_NAME_UPDATED', handleNameSync);
+    return () => {
+      window.removeEventListener('PROFILE_NAME_UPDATED', handleNameSync);
+    };
+  }, []);
 
   // --- INITIAL DATA FETCH ---
   useEffect(() => {
@@ -125,11 +133,9 @@ if (response.ok) {
         const [userRes, journalsRes, sparkRes] = await Promise.all([
           fetch('http://localhost:5000/api/users/profile', { headers }),
           fetch('http://localhost:5000/api/journals', { headers }),
-          // 🔥 APPEND DEV MODE TO THE URL SO BACKEND KNOWS TO SEND A RANDOM TASK
           fetch(`http://localhost:5000/api/sparks/today?devMode=${devMode}`, { headers })
         ]);
 
-        // 1. Handle User Profile & Spark Stats
         if (userRes.ok) {
           const user = await userRes.json();
           setUserData(prev => ({ 
@@ -138,11 +144,10 @@ if (response.ok) {
             sparkPoints: user.sparkPoints,
             sparkStreak: user.sparkStreak,
             lastSparkDate: user.lastSparkDate,
-            isDev: user.isDev // Store dev status
+            isDev: user.isDev 
           }));
         }
 
-        // 2. Handle Journal Consistency Streak
         if (journalsRes.ok) {
           const journals = await journalsRes.json();
           const uniqueDates = [...new Set(journals.map(e => new Date(e.createdAt).toDateString()))]
@@ -170,7 +175,6 @@ if (response.ok) {
           setUserData(prev => ({ ...prev, streak: currentStreak }));
         }
 
-        // 3. Handle Today's Spark Task
         try {
           const sparkData = await sparkRes.json();
           if (sparkRes.ok && sparkData.task) {
@@ -206,19 +210,16 @@ if (response.ok) {
     const interval = setInterval(updateHeader, 30000); 
     return () => clearInterval(interval);
 
-  // 🔥 ADD DEVMODE TO DEPENDENCY ARRAY SO IT RE-FETCHES WHEN TOGGLED
   }, [location.pathname, devMode]); 
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-localStorage.removeItem('userInfo');
-  localStorage.removeItem('cachedAiSummary');
-  localStorage.removeItem('lastAiGeneration');
-    
+    localStorage.removeItem('userInfo');
+    localStorage.removeItem('cachedAiSummary');
+    localStorage.removeItem('lastAiGeneration');
     window.location.href = '/';
   };
 
-  // 🔥 BYPASS DISABLE IF DEV MODE IS ON
   const isSparkDoneToday = !devMode && userData.lastSparkDate && 
     new Date(userData.lastSparkDate).toDateString() === new Date().toDateString();
 
@@ -255,18 +256,28 @@ localStorage.removeItem('userInfo');
         {/* SCROLLABLE CONTENT */}
         <div className="flex-1 overflow-y-auto scrollbar-none min-h-0 overscroll-contain">  
           {/* User Card */}
-          <div className="p-3 mx-3 my-4 bg-sage-pale rounded-2xl flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white font-medium">
-              {userData.name ? userData.name.charAt(0).toUpperCase() : 'M'}
-            </div>
-            <div className="overflow-hidden">
-              <div className="font-medium text-sm text-ink truncate">
-                {userData.name ? userData.name.charAt(0).toUpperCase() + userData.name.slice(1) : "Loading..."}
-              </div>            
-              <div className="text-xs text-sage-dark flex items-center gap-1 truncate">
-                🔥 {userData.streak !== undefined ? userData.streak : 0}-day streak
+          <div className="p-3 mx-3 my-4 bg-sage-pale rounded-2xl flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 overflow-hidden">
+              <div className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white font-medium shrink-0">
+                {userData.name ? userData.name.charAt(0).toUpperCase() : 'M'}
+              </div>
+              <div className="overflow-hidden">
+                <div className="font-medium text-sm text-ink truncate">
+                  {userData.name ? userData.name.charAt(0).toUpperCase() + userData.name.slice(1) : "Loading..."}
+                </div>            
+                <div className="text-xs text-sage-dark flex items-center gap-1 truncate">
+                  🔥 {userData.streak !== undefined ? userData.streak : 0}-day streak
+                </div>
               </div>
             </div>
+
+            {/* 🚀 THE WORKING EDIT TRIGGER BUTTON */}
+            <button 
+              onClick={() => setIsProfileOpen(true)}
+              className="text-xs font-bold text-[#4A6B55] hover:text-[#3D5946] underline pr-1 shrink-0 cursor-pointer"
+            >
+              Edit
+            </button>
           </div>
 
           {/* Navigation */}
@@ -289,7 +300,6 @@ localStorage.removeItem('userInfo');
             <Link to="/meditation" onClick={closeSidebar} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${isActive('/meditation') ? 'bg-sage-pale text-sage-dark font-medium border-l-4 border-sage' : 'text-ink-soft hover:bg-sage-pale/50'}`}>
               <span className="opacity-70">🧘</span> Meditation
             </Link>
-  
             <Link to="/sleep" onClick={closeSidebar} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${isActive('/sleep') ? 'bg-sage-pale text-sage-dark font-medium border-l-4 border-sage' : 'text-ink-soft hover:bg-sage-pale/50'}`}>
               <span className="opacity-70">🌙</span> Sleep Log
             </Link>
@@ -305,16 +315,10 @@ localStorage.removeItem('userInfo');
               <span className="opacity-70">📈</span> Insights & Reports
             </Link>
           </nav>
-          
         </div>
 
-      
-
-   
         {/* LOGOUT */}
         <div className="mt-auto px-4 pb-6 pt-4 flex flex-col gap-1 border-t border-gray-100 bg-white">
-    
-          {/* SOS Button */}
           <button 
             onClick={() => setShowCrisisModal(true)}
             className="flex items-center gap-3 px-2 py-2 rounded-xl text-[#DC2626] hover:bg-[#FEF2F2] transition-colors w-full group"
@@ -328,8 +332,7 @@ localStorage.removeItem('userInfo');
             </svg>
             Logout
           </button>
-          {/* Option 2: The Block Footer */}
-<div className="mt-6 p-3 mx-auto -my-5 w-full rounded-xl text-center">
+          <div className="mt-6 p-3 mx-auto -my-5 w-full rounded-xl text-center">
             <div className="flex justify-center gap-4 text-xs font-medium text-gray-400">
               <button onClick={() => setModalType('privacy')} className="hover:text-ink transition-colors">Privacy</button>
               <button onClick={() => setModalType('terms')} className="hover:text-ink transition-colors">Terms</button>
@@ -338,16 +341,10 @@ localStorage.removeItem('userInfo');
             <p className="text-[10px] text-gray-400 mt-1.5 font-light">MindMate v1.0</p>
           </div>
         </div>
-        
-        
-
-  
       </aside>
 
       {/* MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col min-w-0">
-        
-        {/* TOPBAR */}
         <header className="bg-surface border-b border-sage-light/20 px-4 lg:px-8 h-16 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-3 lg:gap-4">
             <button className="lg:hidden p-1.5 -ml-1.5 text-ink-soft hover:bg-sage-pale rounded-lg transition-colors" onClick={() => setIsSidebarOpen(true)}>
@@ -360,7 +357,6 @@ localStorage.removeItem('userInfo');
           </div>
 
           <div className="flex items-center gap-2 lg:gap-3 shrink-0">
-            {/* DAILY SPARK BUTTON */}
             <button 
               disabled={isSparkDoneToday}
               onClick={() => setShowSpark(true)}
@@ -380,21 +376,32 @@ localStorage.removeItem('userInfo');
           </div>
         </header>
 
-        {/* PAGE CONTENT */}
         <main className="p-4 lg:p-8 flex-1 overflow-x-hidden">
           {children}
         </main>
-       
       </div>
 
-      
-{/* The Global Modal Instance */}
+      {/* GLOBAL MODALS */}
       <LegalModal 
         isOpen={modalType !== null} 
         type={modalType} 
         onClose={() => setModalType(null)} 
       />
 
+      {/* 🚀 FIXED: RENDERED THE MISSING PROFILE MODAL INSTANCE HERE */}
+      <ProfileModal 
+        isOpen={isProfileOpen} 
+        onClose={() => setIsProfileOpen(false)} 
+        currentName={userData.name}
+        onUpdateSuccess={(newName) => {
+          setUserData(prev => ({ ...prev, name: newName }));
+          
+          // Cross-broadcast back to dashboard view in case user edits from sidebar drawer
+          window.dispatchEvent(new CustomEvent('PROFILE_NAME_UPDATED', {
+            detail: { name: newName }
+          }));
+        }}
+      />
 
       {/* DAILY SPARK MODAL */}
       {showSpark && (
@@ -419,43 +426,32 @@ localStorage.removeItem('userInfo');
         </div>
       )}
 
-      {/* 🔥 FLOATING DEV TOGGLE - FIXED BOTTOM RIGHT */}
-   {userData.isDev && location.pathname === '/dashboard' && (
-  <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 flex items-center bg-white rounded-xl p-1 sm:p-1.5 py-2 sm:py-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 transition-all hover:shadow-xl max-w-[calc(100vw-2rem)]">
-    
-    {/* Text Section */}
-    <div className="flex flex-col pl-2 pr-3 sm:pl-3 sm:pr-4 justify-center min-w-0">
-      <span className="text-[9px] sm:text-[10px] font-black text-sage-dark uppercase tracking-widest leading-tight truncate">
-        Developer Access
-      </span>
-      <span className="text-[7px] sm:text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-tight truncate">
-        Authorized Session
-      </span>
-    </div>
+      {/* FLOATING DEV TOGGLE */}
+      {userData.isDev && location.pathname === '/dashboard' && (
+        <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 flex items-center bg-white rounded-xl p-1 sm:p-1.5 py-2 sm:py-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 transition-all hover:shadow-xl max-w-[calc(100vw-2rem)]">
+          <div className="flex flex-col pl-2 pr-3 sm:pl-3 sm:pr-4 justify-center min-w-0">
+            <span className="text-[9px] sm:text-[10px] font-black text-sage-dark uppercase tracking-widest leading-tight truncate">
+              Developer Access
+            </span>
+            <span className="text-[7px] sm:text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-tight truncate">
+              Authorized Session
+            </span>
+          </div>
+          <button
+            onClick={() => setDevMode(!devMode)}
+            className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 whitespace-nowrap shrink-0 ${
+              devMode ? 'bg-sage text-white' : 'bg-ink text-white hover:bg-black' 
+            }`}
+          >
+            {devMode ? 'Lock mode' : 'Unlock mode'}
+          </button>
+        </div>
+      )}
 
-    {/* Button */}
-    <button
-      onClick={() => setDevMode(!devMode)}
-      className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 whitespace-nowrap shrink-0 ${
-        devMode 
-          ? 'bg-sage text-white' 
-          : 'bg-ink text-white hover:bg-black' 
-      }`}
-    >
-      {devMode ? 'Lock mode' : 'Unlock mode'}
-    </button>
-    
-  </div>
-)}
-
-{/* 🔥 MODERN, SOFT CRISIS MODAL */}
+      {/* CRISIS SUPPORT MODAL */}
       {showCrisisModal && (
         <div className="fixed inset-0 z-[100] bg-[#1A1F1C]/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
-          
-          {/* Changed 'rounded-none' to 'rounded-[32px]' and removed the top red border */}
           <div className="bg-white rounded-[32px] w-full max-w-lg shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] relative flex flex-col max-h-[90vh] overflow-hidden border border-gray-100">
-            
-            {/* Header Section: Soft gradient instead of harsh red line */}
             <div className="p-6 sm:p-8 pb-6 bg-gradient-to-b from-red-50/50 to-white">
               <div className="flex items-center gap-3 mb-3">
                 <div className="bg-red-100 text-red-600 p-2 rounded-xl shadow-sm">
@@ -468,27 +464,19 @@ localStorage.removeItem('userInfo');
               </p>
             </div>
 
-            {/* Scrollable Numbers List */}
             <div className="overflow-y-auto px-6 sm:px-8 pb-6 space-y-3">
               {emergencyContacts.map((contact, idx) => (
                 <a 
                   key={idx} 
                   href={`tel:${contact.phone.replace(/-/g, '')}`}
-                  // Smooth rounded-2xl borders for the cards
-                  className={`block rounded-2xl border p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md group ${
-                    contact.isPrimary 
-                      ? 'bg-[#FEF2F2] border-[#FCA5A5] hover:bg-[#FEE2E2]' 
-                      : 'bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50'
-                  }`}
+                  className="block rounded-2xl border p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md group bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50"
                 >
                   <div className="flex justify-between items-center gap-4">
                     <div>
-                      <div className={`font-bold text-sm ${contact.isPrimary ? 'text-[#991B1B]' : 'text-[#1A1F1C]'}`}>
-                        {contact.name}
-                      </div>
+                      <div className="font-bold text-sm text-[#1A1F1C]">{contact.name}</div>
                       <div className="text-xs text-gray-500 mt-1">{contact.sub}</div>
                     </div>
-                    <div className={`font-mono text-lg font-bold tracking-tight shrink-0 transition-transform group-hover:scale-105 ${contact.isPrimary ? 'text-[#DC2626]' : 'text-[#1A1F1C]'}`}>
+                    <div className="font-mono text-lg font-bold tracking-tight text-[#1A1F1C] shrink-0 transition-transform group-hover:scale-105">
                       {contact.phone}
                     </div>
                   </div>
@@ -496,16 +484,13 @@ localStorage.removeItem('userInfo');
               ))}
             </div>
 
-            {/* Footer Action Buttons */}
             <div className="p-6 sm:p-8 pt-4 bg-white flex gap-3 sm:gap-4 border-t border-gray-50">
               <button 
                 onClick={() => setShowCrisisModal(false)}
-                // Rounded buttons to match the modal shape
                 className="flex-1 bg-[#4A6B55] hover:bg-[#3A5543] text-white py-4 px-4 rounded-2xl font-bold tracking-wide text-xs transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
               >
                 I'm Safe, Close
               </button>
-              
               <a 
                 href="/resources"
                 onClick={() => setShowCrisisModal(false)}
@@ -514,16 +499,10 @@ localStorage.removeItem('userInfo');
                 More Resources
               </a>
             </div>
-
           </div>
         </div>
       )}
 
-
-
     </div>
-
-    
   );
-  
 }
