@@ -334,7 +334,8 @@ const latestEntries = entries.slice(0, 4);
     </div>
     
     <Link 
-      to="/history" 
+      to="/history"
+  state={{ from: 'journal' }}
       className="group self-end md:self-auto flex items-center gap-2 text-[10px] sm:text-[11px] font-bold text-sage-dark uppercase tracking-widest hover:text-sage transition-colors"
     >
       View Full History

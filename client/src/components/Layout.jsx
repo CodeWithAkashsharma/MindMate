@@ -235,7 +235,7 @@ export default function Layout({ children }) {
       )}
 
       {/* SIDEBAR */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-[260px] max-w-[85vw] bg-surface border-r border-sage-light/20 flex flex-col h-[100dvh] min-h-0 overflow-hidden scrollbar-none transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:shadow-none ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-[260px] max-w-[85vw] bg-surface border-r border-sage-light/20 flex flex-col h-[100dvh] min-h-0 overflow-hidden scrollbar-none transform transition-transform duration-300 ease-in-out xl:relative xl:translate-x-0 xl:shadow-none ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
         
         {/* Logo Area */}
         <div className="p-6 pb-5 border-b border-sage-light/20 flex items-center justify-between">
@@ -248,7 +248,7 @@ export default function Layout({ children }) {
               <div className="text-[10px] text-ink-muted tracking-widest uppercase mt-[1px]">Wellness Companion</div>
             </div>
           </div>
-          <button onClick={closeSidebar} className="lg:hidden p-1 text-ink-muted hover:bg-sage-pale rounded-lg">
+          <button onClick={closeSidebar} className="xl:hidden p-1 text-ink-muted hover:bg-sage-pale rounded-lg">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
@@ -271,7 +271,6 @@ export default function Layout({ children }) {
               </div>
             </div>
 
-            {/* 🚀 THE WORKING EDIT TRIGGER BUTTON */}
             <button 
               onClick={() => setIsProfileOpen(true)}
               className="text-xs font-bold text-[#4A6B55] hover:text-[#3D5946] underline pr-1 shrink-0 cursor-pointer"
@@ -281,7 +280,7 @@ export default function Layout({ children }) {
           </div>
 
           {/* Navigation */}
-          <nav className="px-3 flex flex-col gap-1">          
+          <nav className="px-3 flex flex-col gap-1">           
             <span className="text-[10px] tracking-widest uppercase text-ink-muted px-3 py-2">Main</span>
             <Link to="/dashboard" onClick={closeSidebar} className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all ${isActive('/dashboard') ? 'bg-sage-pale text-sage-dark font-medium border-l-4 border-sage' : 'text-ink-soft hover:bg-sage-pale/50'}`}>
               <span className="text-[17px] opacity-80">⊹</span>Dashboard
@@ -342,7 +341,6 @@ export default function Layout({ children }) {
           </div>
         </div>
       </aside>
-
       {/* MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="bg-surface border-b border-sage-light/20 px-4 lg:px-8 h-16 flex items-center justify-between sticky top-0 z-30">
@@ -427,8 +425,8 @@ export default function Layout({ children }) {
       )}
 
       {/* FLOATING DEV TOGGLE */}
-      {userData.isDev && location.pathname === '/dashboard' && (
-        <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 flex items-center bg-white rounded-xl p-1 sm:p-1.5 py-2 sm:py-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 transition-all hover:shadow-xl max-w-[calc(100vw-2rem)]">
+{userData.isDev && location.pathname === '/dashboard'  && (
+          <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 flex items-center bg-white rounded-xl p-1 sm:p-1.5 py-2 sm:py-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 transition-all hover:shadow-xl max-w-[calc(100vw-2rem)]">
           <div className="flex flex-col pl-2 pr-3 sm:pl-3 sm:pr-4 justify-center min-w-0">
             <span className="text-[9px] sm:text-[10px] font-black text-sage-dark uppercase tracking-widest leading-tight truncate">
               Developer Access

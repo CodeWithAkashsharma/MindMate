@@ -5,7 +5,7 @@ import { Link, useLocation } from 'react-router-dom';
 
 import QuickActionWidget from '../components/QuickActionWidget';
 
-
+import AudioJournalCard from '../components/AudioJournalCard'
 
 
 
@@ -671,7 +671,8 @@ const toggleTask = (id) => {
 
         <div className="lg:col-span-2 flex flex-col gap-6">
 
-
+   {/*voice note */}
+<AudioJournalCard/>
 
        {/* GROWTH & SPARKS PANEL - REDESIGNED */}
 <div className="bg-white rounded-[28px] border border-sage-light/20 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col relative overflow-hidden transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
@@ -686,7 +687,7 @@ const toggleTask = (id) => {
         <span className="text-2xl drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]">⚡</span>
       </div>
       <div>
-        <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-0.5">Growth Journey</h3>
+        <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-0.5">Your Evolution</h3>
         <p className="text-xl font-serif text-ink leading-none">
           Level {Math.floor((userData.sparkPoints || 0) / 100) + 1} <span className="text-sage-dark italic">Soul</span>
         </p>
@@ -744,7 +745,7 @@ const toggleTask = (id) => {
 
 </div>
 
-
+{/* ai synthsis */}
 
     <div className="w-full bg-white border border-[#E9EFEA] rounded-2xl p-6 md:p-8 shadow-[0_4px_20px_-4px_rgba(74,107,85,0.05)] flex flex-col items-start gap-5 hover:shadow-[0_6px_24px_-4px_rgba(74,107,85,0.08)] transition-all duration-300 relative overflow-hidden group">
       
@@ -794,113 +795,8 @@ const toggleTask = (id) => {
   
 
 
-          {/* RECENT ENTRIES (Hollow-Fix Version) */}
-
-          <div className="bg-surface rounded-2xl border border-sage-light/20 shadow-card p-5 md:p-6 transition-all hover:border-sage-light/40 flex flex-col md:flex-row gap-8">
-
-            <div className="flex-1">
-
-              <div className="flex items-center justify-between mb-6">
-
-                <h3 className="font-serif text-lg text-ink">Recent Entries</h3>
-
-                <Link to="/journal" className="text-xs font-medium text-sage hover:text-sage-dark transition-colors">View All</Link>
-
-              </div>
-
-
-
-              <div className="relative">
-
-                <div className="absolute left-2 top-2 bottom-0 w-0.5 bg-gradient-to-b from-sage-pale via-sage-pale to-transparent"></div>
-
-
-
-                <div className="flex flex-col gap-6">
-
-                  {[
-
-                    { title: 'Morning Planning', time: 'Today, 8:30 AM', color: 'bg-sage', text: 'Feeling pretty good today. Had a great cup of coffee and the weather is amazing.' },
-
-                    { title: 'Late Night Thoughts', time: 'Yesterday', color: 'bg-lavender', text: 'A bit overwhelmed with the database schema, but I mapped out a solid plan.' }
-
-                  ].map((entry, idx) => (
-
-                    <div key={idx} className="relative pl-8 group cursor-pointer">
-
-                      <div className={`absolute left-0 top-1.5 w-4 h-4 rounded-full border-2 border-white ${entry.color} shadow-sm z-10 group-hover:scale-125 group-hover:ring-4 group-hover:ring-sage-pale transition-all`}></div>
-
-
-
-                      <div className="flex justify-between items-start mb-1">
-
-                        <h4 className="font-medium text-ink text-sm group-hover:text-sage-dark transition-colors">{entry.title}</h4>
-
-                        <span className="text-[10px] md:text-xs text-ink-muted whitespace-nowrap ml-2">{entry.time}</span>
-
-                      </div>
-
-                      <p className="text-xs md:text-sm text-ink-soft line-clamp-2 leading-relaxed bg-paper-warm/40 p-4 rounded-xl border border-sage-light/10 group-hover:border-sage-light/40 group-hover:bg-white group-hover:shadow-sm transition-all active:scale-[0.99]">
-
-                        {entry.text}
-
-                      </p>
-
-                    </div>
-
-                  ))}
-
-
-
-                  <div className="relative pl-8 pt-2">
-
-                    <div className="absolute left-[3px] top-4 w-1.5 h-1.5 rounded-full bg-sage-light/40"></div>
-
-                    <p className="text-[10px] text-ink-muted italic">The start of a more mindful you...</p>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-
-            {/* Daily Focus Anchor (fills horizontal space) */}
-
-            <div className="hidden md:flex w-48 flex-col gap-4 border-l border-sage-light/10 pl-6">
-
-              <span className="text-[10px] font-medium text-ink-muted uppercase tracking-widest">Today's Focus</span>
-
-              <div className="flex flex-col gap-3">
-
-                {['Deep Breathing', 'Hydration', 'No Screen Time'].map(item => (
-
-                  <div key={item} className="flex items-center gap-2 group cursor-pointer">
-
-                    <div className="w-4 h-4 rounded border border-sage-light group-hover:bg-sage-pale transition-colors active:scale-90"></div>
-
-                    <span className="text-xs text-ink-soft group-hover:text-ink transition-colors">{item}</span>
-
-                  </div>
-
-                ))}
-
-              </div>
-
-              <div className="mt-auto p-3 bg-lavender-pale/30 rounded-xl border border-lavender/10 group hover:bg-lavender-pale/50 transition-all cursor-default">
-
-                <p className="text-[10px] text-lavender-light leading-snug group-hover:text-lavender transition-colors">AI Tip: Writing for just 5 minutes can lower stress levels.</p>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
+       
+       </div>
 
 
 
@@ -908,143 +804,70 @@ const toggleTask = (id) => {
 
         <div className="flex flex-col gap-6">
 
-          <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] md:rounded-[3rem] border border-white/40 shadow-soft p-4 min-[400px]:p-6 md:p-8 transition-all hover:shadow-card-hover group/container">
+         <div className="w-full max-w-4xl mx-auto bg-white/70 backdrop-blur-xl rounded-[2rem] md:rounded-[3rem] border border-white/40 shadow-soft p-5 min-[400px]:p-6 md:p-8 transition-all hover:shadow-card-hover group/container">
+  
+  {/* HEADER SECTION */}
+  <div className="flex flex-col min-[450px]:flex-row min-[450px]:items-center justify-between mb-6 gap-3">
+    <h3 className="font-serif text-lg md:text-xl text-ink">Consistency</h3>
+    
+    <div className="flex items-center gap-1.5 bg-paper-warm/50 px-3 py-1 rounded-full border border-sage-light/10 self-start">
+      <div className="w-1.5 h-1.5 rounded-full bg-sage animate-pulse"></div>
+      <span className="text-[9px] md:text-[10px] font-bold text-ink-soft uppercase tracking-tighter">Last 4 Weeks</span>
+    </div>
+  </div>
 
+  {/* HEATMAP GRID: Fluid Scaling */}
+  <div className="grid grid-cols-7 gap-1 min-[400px]:gap-2 md:gap-3 w-full">
+    {(stats.heatmap || Array(28).fill(0)).map((level, index) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (27 - index));
+      const dayLabel = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 
-
-            {/* HEADER SECTION */}
-
-            <div className="flex flex-col min-[450px]:flex-row min-[450px]:items-center justify-between mb-6 gap-2">
-
-              <div className="flex flex-col">
-
-                <h3 className="font-serif text-xl text-ink">Consistency</h3>
-
-              </div>
-
-
-
-              <div className="flex items-center gap-1.5 bg-paper-warm/50 px-3 py-1 rounded-full border border-sage-light/10 self-start">
-
-                <div className="w-1.5 h-1.5 rounded-full bg-sage animate-pulse"></div>
-
-                <span className="text-[10px] font-bold text-ink-soft uppercase tracking-tighter">Last 4 Weeks</span>
-
-              </div>
-
-            </div>
-
-
-
-            {/* HEATMAP GRID: Optimized for 300px+ */}
-
-            <div className="grid grid-cols-7 gap-1.5 min-[400px]:gap-2 md:gap-3">
-
-              {(stats.heatmap || Array(28).fill(0)).map((level, index) => {
-
-                // Calculate day for tooltip
-
-                const date = new Date();
-
-                date.setDate(date.getDate() - (27 - index));
-
-                const dayLabel = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-
-
-
-                return (
-
-                  <div key={index} className="group relative">
-
-                    <div
-
-                      style={{ transitionDelay: `${index * 15}ms` }}
-
-                      className={`w-full aspect-square rounded-[4px] min-[400px]:rounded-md md:rounded-lg cursor-pointer transition-all duration-500 animate-in fade-in zoom-in
-
+      return (
+        <div key={index} className="group relative w-full pt-[100%]">
+          <div
+            style={{ transitionDelay: `${index * 15}ms` }}
+            className={`absolute inset-0 rounded-[2px] min-[400px]:rounded-md cursor-pointer transition-all duration-500 animate-in fade-in zoom-in
               ${level === 0 ? 'bg-paper-warm/50 border border-sage-light/5 hover:bg-paper-warm/80' :
-
-                          level === 1 ? 'bg-sage-pale border border-sage-light/20' :
-
-                            level === 2 ? 'bg-sage-light border border-sage/20' :
-
-                              'bg-sage-dark shadow-lg shadow-sage/30 scale-[1.05]'}
-
-              hover:scale-125 hover:z-20 hover:shadow-xl
-
+                level === 1 ? 'bg-sage-pale border border-sage-light/20' :
+                level === 2 ? 'bg-sage-light border border-sage/20' :
+                'bg-sage-dark shadow-lg shadow-sage/30 scale-[1.05]'}
+              hover:scale-110 hover:z-20 hover:shadow-xl
             `}
+          ></div>
 
-                    ></div>
-
-
-
-                    {/* ENHANCED TOOLTIP */}
-
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-all pointer-events-none z-50">
-
-                      <div className="bg-ink text-white px-2 py-1.5 rounded-lg shadow-2xl flex flex-col items-center gap-0.5 min-w-[80px]">
-
-                        <span className="text-[8px] text-white/50 font-bold uppercase tracking-widest">{dayLabel}</span>
-
-                        <span className="text-[10px] font-medium whitespace-nowrap">
-
-                          {level === 0 ? 'Quiet Day' : `${level} Reflection${level > 1 ? 's' : ''}`}
-
-                        </span>
-
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-ink"></div>
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                );
-
-              })}
-
+          {/* TOOLTIP: Repositioned for responsiveness */}
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 hidden md:block">
+            <div className="bg-ink text-white px-2 py-1.5 rounded-lg shadow-2xl flex flex-col items-center gap-0.5 min-w-[80px]">
+              <span className="text-[8px] text-white/50 font-bold uppercase tracking-widest">{dayLabel}</span>
+              <span className="text-[10px] font-medium whitespace-nowrap">
+                {level === 0 ? 'Quiet Day' : `${level} Reflection${level > 1 ? 's' : ''}`}
+              </span>
+              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-ink"></div>
             </div>
-
-
-
-            {/* FOOTER LEGEND */}
-
-            <div className="mt-8 flex items-center justify-between border-t border-sage-light/10 pt-4">
-
-              <div className="hidden min-[500px]:block">
-
-                <p className="text-[10px] text-ink-muted italic">
-
-                  {stats.totalEntries > 0 ? "Tracking your growth daily" : "Start your first entry today"}
-
-                </p>    </div>
-
-
-
-              <div className="flex items-center gap-1.5 ml-auto">
-
-                <span className="text-[8px] font-black text-ink-muted uppercase tracking-tighter mr-1">Intensity</span>
-
-                {[0, 1, 2, 3].map(lvl => (
-
-                  <div
-
-                    key={lvl}
-
-                    className={`w-2.5 h-2.5 md:w-3 md:h-3 rounded-[2px]
-
-            ${lvl === 0 ? 'bg-paper-warm/50' : lvl === 1 ? 'bg-sage-pale' : lvl === 2 ? 'bg-sage-light' : 'bg-sage-dark'}`}
-
-                  ></div>
-
-                ))}
-
-              </div>
-
-            </div>
-
           </div>
+        </div>
+      );
+    })}
+  </div>
+
+  {/* FOOTER LEGEND */}
+  <div className="mt-6 md:mt-8 flex items-center justify-between border-t border-sage-light/10 pt-4">
+    <p className="text-[10px] md:text-xs text-ink-muted italic hidden min-[500px]:block">
+      {stats.totalEntries > 0 ? "Tracking your growth daily" : "Start your first entry today"}
+    </p>
+
+    <div className="flex items-center gap-1.5 ml-auto">
+      <span className="text-[8px] font-black text-ink-muted uppercase tracking-tighter mr-1 hidden sm:block">Intensity</span>
+      {[0, 1, 2, 3].map(lvl => (
+        <div key={lvl} className={`w-2.5 h-2.5 md:w-3 md:h-3 rounded-[2px]
+          ${lvl === 0 ? 'bg-paper-warm/50' : lvl === 1 ? 'bg-sage-pale' : lvl === 2 ? 'bg-sage-light' : 'bg-sage-dark'}`}
+        ></div>
+      ))}
+    </div>
+  </div>
+</div>
+
 
          <div className="bg-surface rounded-2xl border border-sage-light/20 shadow-card p-5 md:p-6 flex-1 flex flex-col transition-all hover:border-sage-light/40">
 
@@ -1090,7 +913,7 @@ Mood Activity
 
 
 
-  <div className="flex-1 flex flex-col justify-center gap-5">
+  <div className="flex-1 flex flex-col justify-center lg:justify-evenly xl;justify-center gap-5">
 
 
 

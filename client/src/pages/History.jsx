@@ -1,231 +1,873 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import {
+  Play,
+  Pause,
+  Mic,
+  BookOpen,
+  LayoutGrid,
+  PencilLine,
+  Trash2,
+  Search,
+} from 'lucide-react';
 
 export default function History() {
   const location = useLocation();
+
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // --- EDIT MODAL STATES ---
+  const [playingId, setPlayingId] = useState(null);
+  const audioPlayerRef = useRef(null);
+
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editForm, setEditForm] = useState({ content: '', gratitude: '', emotions: '' });
+
+  const [editForm, setEditForm] = useState({
+    content: '',
+    gratitude: '',
+    emotions: '',
+  });
+
   const [selectedId, setSelectedId] = useState(null);
 
-  // --- DELETE POPUP STATES ---
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] =
+    useState(false);
+
   const [idToDelete, setIdToDelete] = useState(null);
 
   useEffect(() => {
     const fetchEntries = async () => {
       const token = localStorage.getItem('token');
+
       try {
-        const response = await fetch('http://localhost:5000/api/journals', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await response.json();
-        if (response.ok) {
-          setEntries(data);
-        }
+        const [journalResponse, voiceResponse] =
+          await Promise.all([
+            fetch('http://localhost:5000/api/journals', {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }),
+
+            fetch(
+              'http://localhost:5000/api/voicenotes/all',
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            ),
+          ]);
+
+        let journalsData = [];
+        let voicesData = [];
+
+        if (journalResponse.ok)
+          journalsData = await journalResponse.json();
+
+        if (voiceResponse.ok)
+          voicesData = await voiceResponse.json();
+
+        const combinedData = [
+          ...journalsData,
+          ...voicesData,
+        ].sort(
+          (a, b) =>
+            new Date(b.createdAt) -
+            new Date(a.createdAt)
+        );
+
+        setEntries(combinedData);
       } catch (err) {
-        console.error("Fetch error:", err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
+
     fetchEntries();
+
+    return () => {
+      if (audioPlayerRef.current) {
+        audioPlayerRef.current.pause();
+      }
+    };
   }, [location.pathname]);
 
-  // --- DELETE LOGIC ---
+const [currentTime, setCurrentTime] = useState(0);
+const [duration, setDuration] = useState(0);
+
+const togglePlay = (id, url) => {
+
+  if (playingId === id) {
+
+    audioPlayerRef.current.pause();
+    setPlayingId(null);
+
+  } else {
+
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.pause();
+    }
+
+    const audio = new Audio(url);
+
+    audioPlayerRef.current = audio;
+
+    audio.play();
+
+    setPlayingId(id);
+
+    audio.onloadedmetadata = () => {
+      setDuration(audio.duration);
+    };
+
+    audio.ontimeupdate = () => {
+      setCurrentTime(audio.currentTime);
+    };
+
+    audio.onended = () => {
+      setPlayingId(null);
+      setCurrentTime(0);
+    };
+  }
+};
+
   const confirmDelete = (id) => {
     setIdToDelete(id);
     setIsDeleteModalOpen(true);
   };
 
-  const handleDelete = async () => {
-    const token = localStorage.getItem('token');
-    try {
-      const response = await fetch(`http://localhost:5000/api/journals/${idToDelete}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        setEntries(entries.filter(entry => entry._id !== idToDelete));
-        setIsDeleteModalOpen(false);
-      }
-    } catch (err) {
-      console.error("Delete failed:", err);
-    }
-  };
+ const handleDelete = async () => {
 
-  // --- EDIT LOGIC ---
+  try {
+
+    const token = localStorage.getItem('token');
+
+    const itemToDelete = entries.find(
+      (e) => e._id === idToDelete
+    );
+
+    if (!itemToDelete) return;
+
+    // =========================
+    // VOICE NOTE DELETE
+    // =========================
+
+    if (itemToDelete.audioUrl) {
+
+      const response = await fetch(
+        `http://localhost:5000/api/voicenotes/${idToDelete}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          'Failed to delete voice note'
+        );
+      }
+
+    } else {
+
+      // =========================
+      // JOURNAL DELETE
+      // =========================
+
+      const response = await fetch(
+        `http://localhost:5000/api/journals/${idToDelete}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          'Failed to delete journal'
+        );
+      }
+    }
+
+    // =========================
+// STOP AUDIO IF PLAYING
+// =========================
+
+if (
+  playingId === idToDelete &&
+  audioPlayerRef.current
+) {
+
+  audioPlayerRef.current.pause();
+
+  audioPlayerRef.current.currentTime = 0;
+
+  setPlayingId(null);
+
+  setCurrentTime(0);
+}
+
+// =========================
+// REMOVE FROM UI
+// =========================
+
+setEntries((prev) =>
+  prev.filter(
+    (entry) => entry._id !== idToDelete
+  )
+);
+
+    // =========================
+    // CLOSE MODAL
+    // =========================
+
+    setIsDeleteModalOpen(false);
+
+    setIdToDelete(null);
+
+  } catch (err) {
+
+    console.error(err);
+
+  }
+};
+
   const openEditModal = (entry) => {
     setSelectedId(entry._id);
+
     setEditForm({
       content: entry.content,
       gratitude: entry.gratitude?.[0] || '',
-      emotions: entry.emotions?.[0] || ''
+      emotions: entry.emotions?.[0] || '',
     });
+
     setIsModalOpen(true);
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+
     const token = localStorage.getItem('token');
+
     try {
-      const response = await fetch(`http://localhost:5000/api/journals/${selectedId}`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
-        },
-        body: JSON.stringify({
-          content: editForm.content,
-          gratitude: [editForm.gratitude],
-          emotions: [editForm.emotions]
-        })
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/journals/${selectedId}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            content: editForm.content,
+            gratitude: [editForm.gratitude],
+            emotions: [editForm.emotions],
+          }),
+        }
+      );
+
       if (response.ok) {
         const updatedData = await response.json();
-        setEntries(entries.map(ent => ent._id === selectedId ? updatedData : ent));
+
+        setEntries(
+          entries.map((ent) =>
+            ent._id === selectedId
+              ? updatedData
+              : ent
+          )
+        );
+
         setIsModalOpen(false);
       }
     } catch (err) {
-      console.error("Update failed:", err);
+      console.error(err);
     }
   };
 
+  const filteredEntries = entries.filter((item) => {
+    const isVoice = !!item.audioUrl;
+
+    const matchesFilter =
+      activeFilter === 'all'
+        ? true
+        : activeFilter === 'voice'
+        ? isVoice
+        : !isVoice;
+
+    const searchableText = `
+      ${item.content || ''}
+      ${item.gratitude?.join(' ') || ''}
+      ${item.emotions?.join(' ') || ''}
+      ${item.tag || ''}
+    `.toLowerCase();
+
+    const matchesSearch = searchableText.includes(
+      searchTerm.toLowerCase()
+    );
+
+    return matchesFilter && matchesSearch;
+  });
+
   return (
-    <div className="min-h-screen bg-paper-warm/30 p-4 sm:p-8 lg:p-12 animate-in fade-in duration-700">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[#F8FAF8] via-[#FDFBF7] to-[#F5F8F6] px-2 sm:px-4 md:px-5 lg:px-6 py-3 sm:py-4 animate-in fade-in duration-700">
 
-        {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-16 gap-6">
-          <div className="flex flex-col gap-4">
-            <Link to="/journal" className="group flex items-center gap-2 text-[10px] font-black text-sage-dark uppercase tracking-[0.2em] hover:text-sage transition-all">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transform group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
-              </svg>
-              Back to Journal
-            </Link>
-            <h1 className="font-serif text-4xl md:text-5xl text-ink tracking-tight">The Archive</h1>
-          </div>
-          <div className="flex flex-col md:items-end gap-1">
-            <div className="text-[10px] font-black text-ink-muted/40 uppercase tracking-[0.3em]">Vault</div>
-            <div className="text-sm font-serif italic text-sage-dark">{entries.length} Memories Cataloged</div>
-          </div>
-        </div>
+      {/* BACKGROUND */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-sage/10 blur-3xl rounded-full pointer-events-none" />
 
-        {/* GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
-          {entries.length > 0 ? (
-            entries.map((item) => (
-              <div key={item._id} className="group relative flex flex-col gap-4">
-                <div className="flex items-center gap-3 px-2">
-                  <span className="text-[10px] font-black text-sage-dark uppercase tracking-[0.2em]">
-                    {new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </span>
-                  <div className="h-[1px] flex-1 bg-sage-light/20"></div>
-                  <span className="text-[9px] font-bold text-ink-muted/40 uppercase tracking-widest">{new Date(item.createdAt).getFullYear()}</span>
-                </div>
+      <div className="absolute bottom-0 left-0 w-[450px] h-[450px] bg-lavender/10 blur-3xl rounded-full pointer-events-none" />
 
-                <div className="relative bg-surface border border-sage-light/20 p-6 md:p-10 rounded-[2.5rem] transition-all duration-700 ease-out hover:scale-[1.02] hover:border-sage/50 hover:shadow-soft hover:bg-white/90 flex flex-col h-full min-h-[380px] overflow-hidden group/card">
-                  
-                  {/* WATERMARK */}
-                  <div className="absolute -bottom-6 -right-6 text-sage-light/10 text-9xl font-serif select-none pointer-events-none transform group-hover/card:-translate-x-4 group-hover/card:-translate-y-4 group-hover/card:rotate-12 transition-all duration-1000">
-                    {item.emotions?.[0]?.split(' ')[0] || '✨'}
-                  </div>
+      {/* MAIN */}
+      <div className="max-w-[1750px] mx-auto relative z-10">
 
-                  <div className="relative z-10">
-                    <div className="mb-8 flex justify-between items-start">
-                      <div className="px-4 py-1.5 bg-sage-pale group-hover/card:bg-sage/20 rounded-full border border-sage-light/10 text-sage-dark text-[10px] font-bold uppercase tracking-tight transition-colors duration-500">
-                        {item.emotions?.[0] || 'Neutral'}
-                      </div>
-                      
-                      {/* ACTION BUTTONS */}
-                      <div className="flex gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
-                        <button onClick={() => openEditModal(item)} className="p-2 hover:text-gray-500 hover:bg-gray-100 rounded-full transition-all">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                          </svg>
-                        </button>
-                        <button onClick={() => confirmDelete(item._id)} className="p-2 text-red-700 hover:text-red-400 hover:bg-red-50 rounded-full transition-all">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
+     {/* HEADER */}
+<div className="bg-white/88 backdrop-blur-2xl border border-white/60 rounded-[2.4rem] px-5 sm:px-7 lg:px-8 py-5 shadow-[0_12px_40px_rgba(74,107,85,0.05)] mb-5 sticky top-3 z-30 overflow-hidden">
 
-                    <div className="mb-8">
-                      <span className="text-[9px] font-black text-ink-muted/30 uppercase tracking-[0.2em] block mb-3 group-hover/card:text-sage transition-colors">Gratitude Focus</span>
-                      <p className="font-serif text-2xl md:text-3xl italic text-ink leading-snug group-hover/card:text-sage-dark transition-colors duration-500">
-                        "{item.gratitude?.[0] || 'Untitled'}"
-                      </p>
-                    </div>
-                  </div>
+  {/* SOFT LIGHT */}
+  <div className="absolute top-0 right-0 w-[260px] h-[260px] bg-sage/5 blur-3xl rounded-full pointer-events-none"></div>
 
-                  <div className="relative z-10 border-t border-sage-light/10 pt-8 mt-auto group-hover/card:border-sage/20 transition-colors">
-                    <span className="text-[9px] font-black text-ink-muted/30 uppercase tracking-[0.2em] block mb-4">Detailed Reflection</span>
-                    <p className="text-sm md:text-base text-ink-soft leading-relaxed whitespace-pre-wrap font-sans opacity-80 group-hover/card:opacity-100 transition-opacity duration-500">{item.content}</p>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            !loading && <div className="col-span-full text-center py-32 border-2 border-dashed border-sage-light/20 rounded-[3rem]">Archive empty.</div>
-          )}
-        </div>
-        {loading && <div className="flex justify-center py-20 text-ink-muted italic">Cataloging memories...</div>}
+  <div className="relative z-10 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
+
+    {/* LEFT SIDE */}
+    <div className="min-w-0 flex-1">
+
+      {/* TOP ROW */}
+      <div className="flex items-center gap-3 mb-4">
+
+       <Link
+  to={
+    location.state?.from === 'dashboard'
+      ? '/dashboard'
+      : '/journal'
+  }
+  className="group flex items-center gap-2 text-[12px] font-semibold text-sage-dark/75 hover:text-sage transition-all"
+>
+          <span className="group-hover:-translate-x-1 transition-transform duration-300">
+            ←
+          </span>
+
+          Back
+        </Link>
+
+        <div className="h-4 w-px bg-sage-dark/10"></div>
+
+        <span className="text-[10px] uppercase tracking-[0.22em] text-sage-dark/30 font-bold">
+          Memory Archive
+        </span>
       </div>
 
-      {/* --- MODAL 1: EDIT FORM --- */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-ink/30 backdrop-blur-md animate-in fade-in duration-500" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-surface w-full max-w-lg rounded-[3rem] p-8 md:p-12 shadow-2xl border border-sage-light/20 animate-in zoom-in-95 duration-300">
-            <div className="flex justify-between items-center mb-8">
-              <div>
-                <h2 className="font-serif text-2xl text-ink">Refine Memory</h2>
-                <p className="text-[10px] text-sage-dark font-black uppercase tracking-widest mt-1">Update your reflection</p>
-              </div>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-sage-pale rounded-full text-ink-muted">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
-            </div>
-            <form onSubmit={handleUpdate} className="flex flex-col gap-6">
-              <div>
-                <label className="text-[10px] font-black text-sage-dark uppercase tracking-widest block mb-3">Update Mood</label>
-                <div className="flex flex-wrap gap-2">
-                  {['😊 Happy', '😌 Peaceful', '🤩 Excited', '😫 Overwhelmed', '😴 Tired', '🌪️ Anxious'].map((mood) => (
-                    <button key={mood} type="button" onClick={() => setEditForm({ ...editForm, emotions: mood })} className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border ${editForm.emotions === mood ? 'bg-sage text-white border-sage shadow-md' : 'bg-paper-warm/50 text-ink-soft border-sage-light/20 hover:border-sage/50'}`}>{mood}</button>
-                  ))}
+      {/* MAIN TITLE ROW */}
+      <div className="flex flex-wrap items-end gap-x-5 gap-y-3">
+
+        {/* TITLE */}
+        <h1 className="font-serif text-[2rem] sm:text-[4.2rem] leading-[0.9] tracking-[-0.045em] text-[#1D1D1D] whitespace-nowrap">
+          Your Journey
+        </h1>
+
+        {/* MEMORY COUNT */}
+        <div className="mb-2 flex items-center gap-3 flex-wrap">
+
+          <div className=" items-center hidden sm:inline-flex   gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-sage-dark to-sage shadow-lg shadow-sage/15">
+
+            <div className="w-2 h-2  rounded-full bg-white/80 animate-pulse "></div>
+
+            <span className="text-[7px]  sm:text-[9px] font-black uppercase tracking-[0.18em] text-white">
+              {entries.length} Memories
+            </span>
+          </div>
+
+        </div>
+      </div>
+          <p className="text-[15px] text-[#7D857F] leading-relaxed hidden sm:block">
+            Reflections, emotions & voice memories.
+          </p>
+    </div>
+
+    {/* RIGHT SIDE */}
+    <div className="w-full xl:w-auto flex flex-col lg:flex-row items-stretch lg:items-center gap-3">
+
+      {/* SEARCH */}
+      <div className="relative w-full lg:w-[360px]">
+
+        <input
+          type="text"
+          placeholder="Search memories..."
+          value={searchTerm}
+          onChange={(e) =>
+            setSearchTerm(e.target.value)
+          }
+          className="w-full h-[54px] bg-white/95 border border-sage/10 rounded-2xl px-5 pl-12 text-sm text-ink placeholder:text-slate-400 shadow-[0_8px_24px_rgba(74,107,85,0.06)] focus:outline-none focus:border-sage/30 focus:ring-4 focus:ring-sage/10 transition-all"
+        />
+
+        <Search
+          size={18}
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-sage-dark/35"
+        />
+      </div>
+
+      {/* FILTERS */}
+      <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
+
+        {[
+          {
+            id: 'all',
+            label: 'All',
+            icon: LayoutGrid,
+          },
+          {
+            id: 'journal',
+            label: 'Journals',
+            icon: BookOpen,
+          },
+          {
+            id: 'voice',
+            label: 'Voice Notes',
+            icon: Mic,
+          },
+        ].map((filter) => {
+          const Icon = filter.icon;
+
+          return (
+            <button
+              key={filter.id}
+              onClick={() =>
+                setActiveFilter(filter.id)
+              }
+              className={` h-[30px]  sm:h-[54px] shrink-0 px-2 sm:px-5 rounded-lg sm:rounded-2xl text-[9px] sm:text-[11px] font-black uppercase tracking-[0.16em] transition-all duration-300 active:scale-[0.97] flex items-center gap-2
+
+              ${
+                activeFilter === filter.id
+                  ? 'bg-gradient-to-r from-sage-dark to-sage text-white shadow-lg shadow-sage/15'
+                  : 'bg-white text-sage-dark border border-sage-light/20 hover:bg-sage-pale shadow-sm'
+              }`}
+            >
+              <Icon size={14} />
+              {filter.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+</div>
+
+        {/* FEED */}
+        <div className="columns-1 2xl:columns-2 gap-5 space-y-5">
+
+          {filteredEntries.map((item, index) => {
+
+            const isVoiceNote = !!item.audioUrl;
+
+            return (
+              <div
+                key={item._id}
+                style={{
+                  animationDelay: `${index * 60}ms`,
+                }}
+                className="break-inside-avoid animate-in fade-in slide-in-from-bottom-3 duration-700"
+              >
+
+                {/* CARD */}
+                <div
+                  className={`group relative backdrop-blur-md border rounded-[2rem] p-5 sm:p-6 shadow-[0_8px_30px_rgba(74,107,85,0.06)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_14px_40px_rgba(74,107,85,0.12)] overflow-hidden before:absolute before:inset-0 before:rounded-[2rem] before:bg-gradient-to-br before:from-sage/5 before:via-transparent before:to-lavender/5 before:opacity-0 hover:before:opacity-100 before:transition-all before:duration-700
+
+                  ${
+                    isVoiceNote
+                      ? 'bg-gradient-to-br from-[#F8FBF9] via-white to-[#EEF5F1] border-lavender/20'
+                      : 'bg-gradient-to-br from-[#FFFDFC] via-white to-[#F5F9F6] border-sage-light/15'
+                  }`}
+                >
+
+                  {/* TOP */}
+                  <div className="relative z-10 flex items-start justify-between gap-4 mb-5">
+
+                    <div className="flex flex-col gap-2">
+
+                      <div className="flex items-center gap-2 flex-wrap">
+
+                        <div className="px-3 py-1.5 rounded-full bg-sage-pale text-[9px] font-black uppercase tracking-[0.15em] text-sage-dark border border-sage-light/10">
+                          {isVoiceNote
+                            ? 'Voice Reflection'
+                            : item.emotions?.[0] ||
+                              'Reflection'}
+                        </div>
+
+                      </div>
+                      <div className='flex gap-3'>
+
+                        <div className="text-[9px] font-black uppercase tracking-[0.15em] text-ink-muted/40">
+                          {new Date(
+                            item.createdAt
+                          ).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </div>
+                      <div className="text-[10px] text-slate-400 font-mono uppercase tracking-[0.12em]">
+                        {new Date(
+                          item.createdAt
+                        ).toLocaleTimeString('en-GB', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </div>
+                      </div>
+                    </div>
+
+                    {/* ACTIONS */}
+                    <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300">
+
+                      {!isVoiceNote && (
+                        <button
+                          onClick={() =>
+                            openEditModal(item)
+                          }
+                          className="w-9 h-9 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-500 flex items-center justify-center transition-all active:scale-95"
+                        >
+                          <PencilLine
+                            size={16}
+                            strokeWidth={2.2}
+                          />
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() =>
+                          confirmDelete(item._id)
+                        }
+                        className="w-9 h-9 rounded-full bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center transition-all active:scale-95"
+                      >
+                        <Trash2
+                          size={16}
+                          strokeWidth={2.2}
+                        />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* CONTENT */}
+                  {isVoiceNote ? (
+<div className="relative z-10 flex items-center gap-4 rounded-[1.5rem] bg-gradient-to-r from-[#F7FAF8] to-[#EEF5F1] border border-sage-light/10 p-4">
+
+  {/* PLAYER BUTTON */}
+  <button
+    onClick={() =>
+      togglePlay(
+        item._id,
+        item.audioUrl
+      )
+    }
+    className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg active:scale-95 shrink-0
+
+    ${
+      playingId === item._id
+        ? 'bg-gradient-to-br from-sage-dark to-sage text-white'
+        : 'bg-white text-sage-dark hover:bg-sage hover:text-white'
+    }`}
+  >
+    {playingId === item._id ? (
+      <Pause
+        size={20}
+        fill="currentColor"
+      />
+    ) : (
+      <Play
+        size={20}
+        fill="currentColor"
+        className="ml-0.5"
+      />
+    )}
+  </button>
+
+  {/* CONTENT */}
+  <div className="flex-1 min-w-0">
+
+    {/* TITLE */}
+    <div className="flex items-start justify-between gap-3">
+
+      <div className="min-w-0">
+
+        <p className="font-serif text-xl text-ink truncate">
+          {item.tag || 'Voice Reflection'}
+        </p>
+
+        <div className="flex items-center gap-2 mt-1 flex-wrap">
+
+          <span className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
+            Voice Note
+          </span>
+
+          {playingId === item._id && (
+            <>
+              <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+
+              <span className="text-[10px] font-semibold text-sage-dark animate-pulse">
+                Playing...
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+
+      
+    </div>
+
+    {/* AUDIO BAR */}
+    <div className="mt-4">
+
+      <div className="w-full h-2 rounded-full bg-sage-light/20 overflow-hidden">
+
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-sage-dark to-sage transition-all duration-200"
+          style={{
+            width:
+              playingId === item._id && duration
+                ? `${
+                    (currentTime / duration) *
+                    100
+                  }%`
+                : '0%',
+          }}
+        />
+      </div>
+
+      {/* TIME */}
+      <div className="flex items-center justify-between mt-2">
+
+        <span className="text-[11px] text-slate-400 font-medium">
+          {playingId === item._id
+            ? `${Math.floor(
+                currentTime / 60
+              )}:${String(
+                Math.floor(currentTime % 60)
+              ).padStart(2, '0')}`
+            : '0:00'}
+        </span>
+
+        <span className="text-[11px] text-slate-400 font-medium">
+          {item.duration}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+                  ) : (
+
+                    <div className="relative z-10 flex flex-col gap-5">
+
+                      {/* GRATITUDE */}
+                      <div>
+
+                        <div className="text-[9px] font-black uppercase tracking-[0.15em] text-ink-muted/30 mb-3">
+                          Gratitude Focus
+                        </div>
+
+                        <p className="font-serif text-2xl sm:text-3xl italic text-ink leading-snug">
+                          "
+                          {item.gratitude?.[0] ||
+                            'Untitled Reflection'}
+                          "
+                        </p>
+                      </div>
+
+                      {/* CONTENT */}
+                      <div className="border-t border-sage-light/10 pt-5">
+
+                        <p className="text-sm sm:text-[15px] leading-relaxed text-ink-soft whitespace-pre-wrap">
+                          {item.content}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-              <div>
-                <label className="text-[10px] font-black text-sage-dark uppercase tracking-widest block mb-2">Gratitude</label>
-                <input type="text" value={editForm.gratitude} onChange={(e) => setEditForm({...editForm, gratitude: e.target.value})} className="w-full bg-paper-warm/30 border-b-2 border-sage-light/30 py-3 text-lg font-serif italic text-ink focus:outline-none focus:border-sage transition-all" />
+            );
+          })}
+        </div>
+
+        {/* EMPTY */}
+        {!loading &&
+          filteredEntries.length === 0 && (
+            <div className="bg-white/70 backdrop-blur-xl border border-dashed border-sage-light/20 rounded-[2rem] py-20 px-6 text-center mt-6">
+
+              <div className="text-6xl mb-6">
+                🌱
               </div>
-              <div>
-                <label className="text-[10px] font-black text-sage-dark uppercase tracking-widest block mb-2">Reflection</label>
-                <textarea rows="5" value={editForm.content} onChange={(e) => setEditForm({...editForm, content: e.target.value})} className="w-full bg-paper-warm/30 border border-sage-light/10 rounded-2xl px-5 py-4 text-sm leading-relaxed text-ink-soft focus:outline-none focus:border-sage/50 transition-all resize-none" />
+
+              <h3 className="font-serif text-3xl text-ink mb-4">
+                No matching memories.
+              </h3>
+
+              <p className="text-ink-muted max-w-md mx-auto leading-relaxed">
+                Try searching with different keywords
+                or change your filters.
+              </p>
+            </div>
+          )}
+
+        {/* LOADING */}
+        {loading && (
+          <div className="flex justify-center py-24">
+
+            <div className="flex items-center gap-3 text-sage-dark">
+
+              <div className="w-3 h-3 rounded-full bg-sage animate-bounce"></div>
+
+              <div className="w-3 h-3 rounded-full bg-sage animate-bounce delay-100"></div>
+
+              <div className="w-3 h-3 rounded-full bg-sage animate-bounce delay-200"></div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* EDIT MODAL */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+
+          <div
+            className="absolute inset-0 bg-ink/40 backdrop-blur-md"
+            onClick={() => setIsModalOpen(false)}
+          />
+
+          <div className="relative bg-gradient-to-br from-white via-[#FCFDFB] to-[#F5F9F6] w-full max-w-lg rounded-[2.5rem] p-8 shadow-[0_20px_80px_rgba(74,107,85,0.15)] border border-sage-light/20 overflow-hidden">
+
+            <div className="absolute top-0 right-0 w-40 h-40 bg-sage/10 blur-3xl rounded-full pointer-events-none" />
+
+            <div className="relative z-10">
+
+              <div className="flex justify-between items-center mb-8">
+
+                <div>
+                  <h2 className="font-serif text-3xl text-ink">
+                    Refine Memory
+                  </h2>
+
+                  <p className="text-sm text-ink-muted mt-1">
+                    Update your reflection gently.
+                  </p>
+                </div>
+
+                <button
+                  onClick={() =>
+                    setIsModalOpen(false)
+                  }
+                  className="w-10 h-10 rounded-full hover:bg-paper-warm flex items-center justify-center transition-all"
+                >
+                  ✕
+                </button>
               </div>
-              <button type="submit" className="w-full bg-sage text-white font-bold py-4 rounded-xl hover:bg-sage-dark transition-all shadow-lg active:scale-[0.98]">Save Changes</button>
-            </form>
+
+              <form
+                onSubmit={handleUpdate}
+                className="flex flex-col gap-5"
+              >
+
+                <div className="flex flex-col gap-2">
+
+                  <label className="text-[10px] font-black uppercase tracking-[0.15em] text-sage-dark">
+                    Gratitude
+                  </label>
+
+                  <input
+                    type="text"
+                    value={editForm.gratitude}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        gratitude: e.target.value,
+                      })
+                    }
+                    className="w-full bg-white/80 shadow-inner border border-sage-light/20 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-sage/20"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+
+                  <label className="text-[10px] font-black uppercase tracking-[0.15em] text-sage-dark">
+                    Reflection
+                  </label>
+
+                  <textarea
+                    rows="6"
+                    value={editForm.content}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        content: e.target.value,
+                      })
+                    }
+                    className="w-full bg-white/80 shadow-inner border border-sage-light/20 rounded-2xl px-5 py-4 resize-none focus:outline-none focus:ring-2 focus:ring-sage/20"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-sage-dark to-sage text-white font-bold py-4 rounded-2xl hover:shadow-lg hover:shadow-sage/20 transition-all active:scale-[0.98]"
+                >
+                  Save Changes
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       )}
 
-      {/* --- MODAL 2: CUSTOM DELETE POPUP --- */}
+      {/* DELETE MODAL */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-ink/40 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setIsDeleteModalOpen(false)} />
-          <div className="relative bg-surface w-full max-w-sm rounded-[2.5rem] p-10 shadow-2xl border border-red-100 animate-in zoom-in-95 duration-300 text-center">
-            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full mx-auto mb-6 flex items-center justify-center text-2xl shadow-inner">⚠️</div>
-            <h3 className="font-serif text-2xl text-ink mb-3">Delete Memory?</h3>
-            <p className="text-ink-muted text-[11px] leading-relaxed mb-8 px-2">This reflection will be permanently removed from your archive. This action cannot be undone.</p>
-            <div className="flex flex-col gap-3">
-              <button onClick={handleDelete} className="w-full py-4 bg-red-500 text-white rounded-2xl font-bold text-sm hover:bg-red-700 transition-all active:scale-95 shadow-lg shadow-red-200">Yes, Delete Forever</button>
-              <button onClick={() => setIsDeleteModalOpen(false)} className="w-full py-4 bg-paper-warm text-ink-soft rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all active:scale-95">No, Keep It</button>
+
+          <div
+            className="absolute inset-0 bg-ink/40 backdrop-blur-sm"
+            onClick={() =>
+              setIsDeleteModalOpen(false)
+            }
+          />
+
+          <div className="relative bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-red-100 text-center overflow-hidden">
+
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-red-100/40 blur-3xl rounded-full pointer-events-none" />
+
+            <div className="relative z-10">
+
+              <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full mx-auto mb-6 flex items-center justify-center">
+                <Trash2 size={28} />
+              </div>
+
+              <h3 className="font-serif text-3xl text-ink mb-3">
+                Delete Memory?
+              </h3>
+
+              <p className="text-ink-muted text-sm leading-relaxed mb-8">
+                This reflection will be permanently
+                removed from your archive.
+              </p>
+
+              <div className="flex flex-col gap-3">
+
+                <button
+                  onClick={handleDelete}
+                  className="w-full py-4 bg-red-500 text-white rounded-2xl font-bold hover:bg-red-700 transition-all active:scale-95"
+                >
+                  Delete Forever
+                </button>
+
+                <button
+                  onClick={() =>
+                    setIsDeleteModalOpen(false)
+                  }
+                  className="w-full py-4 bg-paper-warm text-ink-soft rounded-2xl font-bold hover:bg-gray-100 transition-all active:scale-95"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
