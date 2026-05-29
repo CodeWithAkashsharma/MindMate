@@ -69,4 +69,42 @@ body,
   height: 100%;
   overflow-x: hidden;
 }
+/* Modern Floating Scrollbar */
 
+/* =========================
+   MODERN FLOATING SCROLLBAR
+========================= */
+
+/* Firefox Support */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-sage-dark) transparent; 
+}
+
+/* WebKit (Chrome, Safari, Edge) Support */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px; /* Thickness of the big line */
+}
+
+/* The Track (Invisible background) */
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* The Thumb (The big line itself) */
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--color-sage-dark);
+  border-radius: 4px; 
+  
+  /* NEW: The trick to make the line shorter vertically */
+  border-top: 40px solid transparent;    /* Pushes the visible color down from the top */
+  border-bottom: 40px solid transparent; /* Pushes the visible color up from the bottom */
+  background-clip: padding-box;          /* Tells the background color to stay inside the borders */
+
+  min-height: 120px; /* Combined with the 80px of borders above, this keeps the visible line at least 40px tall */
+}
+
+/* Hover State */
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-ink-soft); /* Darkens slightly when interacted with */
+}

@@ -6,7 +6,7 @@ import {
 
 import LegalModal from '../components/LegalModal';
 import ProfileModal from '../components/ProfileModal'; // 👈 Verified import is ready!
-
+import logoImg from '../assets/logo_image.png'
 export default function Layout({ children }) {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -224,8 +224,7 @@ export default function Layout({ children }) {
     new Date(userData.lastSparkDate).toDateString() === new Date().toDateString();
 
   return (
-    <div className="flex min-h-screen bg-paper w-full overflow-hidden relative">
-      
+<div className="flex h-screen bg-paper w-full overflow-hidden fixed inset-0">      
       {/* MOBILE OVERLAY */}
       {isSidebarOpen && (
         <div 
@@ -235,14 +234,18 @@ export default function Layout({ children }) {
       )}
 
       {/* SIDEBAR */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-[260px] max-w-[85vw] bg-surface border-r border-sage-light/20 flex flex-col h-[100dvh] min-h-0 overflow-hidden scrollbar-none transform transition-transform duration-300 ease-in-out xl:relative xl:translate-x-0 xl:shadow-none ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0  left-0 z-50 w-[260px] max-w-[85vw] bg-surface border-r border-sage-light/20 flex flex-col h-[100dvh] min-h-0 overflow-hidden scrollbar-none transform transition-transform duration-300 ease-in-out xl:relative xl:translate-x-0 xl:shadow-none ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
         
         {/* Logo Area */}
         <div className="p-6 pb-5 border-b border-sage-light/20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-sage to-sage-dark rounded-xl flex items-center justify-center text-white shrink-0">
-              <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
-            </div>
+          <div className="flex items-center gap-1">
+          
+ <img 
+      src={logoImg} 
+      alt="logo" 
+      className="w-13 h-13 object-cover"
+    />
+          
             <div>
               <div className="font-serif text-xl tracking-tight text-ink">MindMate</div>
               <div className="text-[10px] text-ink-muted tracking-widest uppercase mt-[1px]">Wellness Companion</div>
@@ -254,9 +257,8 @@ export default function Layout({ children }) {
         </div>
 
         {/* SCROLLABLE CONTENT */}
-        <div className="flex-1 overflow-y-auto scrollbar-none min-h-0 overscroll-contain">  
-          {/* User Card */}
-          <div className="p-3 mx-3 my-4 bg-sage-pale rounded-2xl flex items-center justify-between gap-3">
+<div className="flex-1  custom-scrollbar overflow-y-auto min-h-0 overscroll-contain">
+            <div className="p-3 mx-3 my-4 bg-sage-pale rounded-2xl flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 overflow-hidden">
               <div className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white font-medium shrink-0">
                 {userData.name ? userData.name.charAt(0).toUpperCase() : 'M'}
@@ -320,18 +322,18 @@ export default function Layout({ children }) {
         <div className="mt-auto px-4 pb-6 pt-4 flex flex-col gap-1 border-t border-gray-100 bg-white">
           <button 
             onClick={() => setShowCrisisModal(true)}
-            className="flex items-center gap-3 px-2 py-2 rounded-xl text-[#DC2626] hover:bg-[#FEF2F2] transition-colors w-full group"
+            className="flex items-center gap-3 px-2 py-1 rounded-xl text-[#DC2626] hover:bg-[#FEF2F2] transition-colors w-full group"
           >
             <LifeBuoy size={18} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
             <span className="text-[13px] font-semibold tracking-wide">Emergency Help</span>
           </button>
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all group">
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-2.5 py-1 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all group">
             <svg className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
             Logout
           </button>
-          <div className="mt-6 p-3 mx-auto -my-5 w-full rounded-xl text-center">
+          <div className="mt-1 p-3 mx-auto -my-5 w-full rounded-xl text-center">
             <div className="flex justify-center gap-4 text-xs font-medium text-gray-400">
               <button onClick={() => setModalType('privacy')} className="hover:text-ink transition-colors">Privacy</button>
               <button onClick={() => setModalType('terms')} className="hover:text-ink transition-colors">Terms</button>
@@ -368,9 +370,7 @@ export default function Layout({ children }) {
               {isSparkDoneToday ? 'Spark Captured' : 'Daily Spark'}
             </button>
 
-            <Link to="/chat" className="flex items-center gap-2 px-4 py-2 lg:px-5 lg:py-2.5 text-xs lg:text-sm font-bold bg-[#1A1F1C] text-white rounded-2xl hover:bg-black transition-all shadow-md active:scale-95 whitespace-nowrap">
-              <span>🤖</span> Chat
-            </Link>
+          
           </div>
         </header>
 

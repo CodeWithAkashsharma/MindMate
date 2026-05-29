@@ -166,13 +166,19 @@ export default function LegalModal({ isOpen, onClose, type }) {
                     </div>
                   </div>
                   
-                  <div className="border border-gray-100 rounded-xl p-4 flex flex-col gap-2 hover:border-purple-200 hover:bg-purple-50/30 transition-all cursor-pointer group shadow-sm">
-                    <MessageSquare className="text-purple-500" size={20} />
-                    <div>
-                      <h4 className="font-medium text-gray-900 text-sm group-hover:text-purple-700 transition-colors">Live AI Chat</h4>
-                      <p className="text-[11px] text-gray-500 mt-0.5">Instant resolution</p>
-                    </div>
-                  </div>
+     <div className="border border-gray-100 rounded-xl p-4 flex flex-col gap-2 hover:border-blue-200 hover:bg-blue-50/30 transition-all cursor-pointer group shadow-sm">
+  <div className="text-xl">💙</div>
+
+  <div>
+    <h4 className="font-medium text-gray-900 text-sm group-hover:text-blue-700 transition-colors">
+      Support Center
+    </h4>
+
+    <p className="text-[11px] text-gray-500 mt-0.5">
+      Help and guidance anytime
+    </p>
+  </div>
+</div>
 
                   <div className="border border-gray-100 rounded-xl p-4 flex flex-col gap-2 hover:border-orange-200 hover:bg-orange-50/30 transition-all cursor-pointer group shadow-sm">
                     <Bug className="text-orange-500" size={20} />
