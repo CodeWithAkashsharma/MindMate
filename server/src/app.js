@@ -15,6 +15,7 @@ const QuickAction= require('./routes/quickActions')
 const insightsRoutes = require('./routes/insightsRoutes');
 const otpRoutes = require('./routes/otpRoutes')
 const voiceNotesRoute = require('./routes/voiceNotes');
+const  chatRoutes = require("./routes/chatRoutes"); 
 
 const app = express();
 app.use(express.urlencoded({ extended: false }));
@@ -33,6 +34,7 @@ app.use('/api/quick-actions',QuickAction);
 app.use('/api/insights', insightsRoutes);
 app.use('/api/otp', otpRoutes);
 app.use('/api/voicenotes', voiceNotesRoute);
+app.use("/api/chat",chatRoutes );
 const seedSparks = async () => {
   try {
     const count = await DailySpark.countDocuments();

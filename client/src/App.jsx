@@ -13,6 +13,7 @@ import SleepLog from './pages/SleepLog';
 import Assessment from './pages/Assessment';
 import Resources from './pages/Resources';
 import Insights from './pages/Insights';
+import Chat from './pages/Chats';
 
 const token = localStorage.getItem('token');
 
@@ -36,7 +37,8 @@ function App() {
 <Route path="/SelfAssesment" element={<Layout><Assessment/></Layout> } />
 <Route path="/Resources" element={<Layout><Resources/></Layout> } />
 <Route path="/Insights" element={<Layout><Insights/></Layout> } />
-               
+<Route path="/chat" element={<Layout><Chat/></Layout> } />
+
                 
               
         

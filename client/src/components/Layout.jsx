@@ -228,7 +228,7 @@ export default function Layout({ children }) {
       {/* MOBILE OVERLAY */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-ink/20 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+          className="fixed inset-0 bg-ink/20 backdrop-blur-sm z-40 xl:hidden transition-opacity"
           onClick={closeSidebar}
         />
       )}
@@ -287,6 +287,12 @@ export default function Layout({ children }) {
             <Link to="/dashboard" onClick={closeSidebar} className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all ${isActive('/dashboard') ? 'bg-sage-pale text-sage-dark font-medium border-l-4 border-sage' : 'text-ink-soft hover:bg-sage-pale/50'}`}>
               <span className="text-[17px] opacity-80">⊹</span>Dashboard
             </Link>
+            <Link to="/chat" onClick={closeSidebar} className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all ${isActive('/chat') ? 'bg-sage-pale text-sage-dark font-medium border-l-4 border-sage' : 'text-ink-soft hover:bg-sage-pale/50'}`}>
+            <span className="text-[17px] opacity-80">🤖</span>
+  AI Chat
+            </Link>
+           
+
             <Link to="/journal" onClick={closeSidebar} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${isActive('/journal') ? 'bg-sage-pale text-sage-dark font-medium border-l-4 border-sage' : 'text-ink-soft hover:bg-sage-pale/50'}`}>
               <span className="text-base opacity-80">📑</span> Daily Journal
             </Link>
@@ -322,12 +328,12 @@ export default function Layout({ children }) {
         <div className="mt-auto px-4 pb-6 pt-4 flex flex-col gap-1 border-t border-gray-100 bg-white">
           <button 
             onClick={() => setShowCrisisModal(true)}
-            className="flex items-center gap-3 px-2 py-1 rounded-xl text-[#DC2626] hover:bg-[#FEF2F2] transition-colors w-full group"
+            className="flex items-center gap-3 px-2 py-1 rounded-lg text-[#DC2626] hover:bg-[#FEF2F2] transition-colors w-full group"
           >
             <LifeBuoy size={18} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
             <span className="text-[13px] font-semibold tracking-wide">Emergency Help</span>
           </button>
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-2.5 py-1 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all group">
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-2.5 py-1 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-all group">
             <svg className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
@@ -347,7 +353,7 @@ export default function Layout({ children }) {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="bg-surface border-b border-sage-light/20 px-4 lg:px-8 h-16 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-3 lg:gap-4">
-            <button className="lg:hidden p-1.5 -ml-1.5 text-ink-soft hover:bg-sage-pale rounded-lg transition-colors" onClick={() => setIsSidebarOpen(true)}>
+            <button className="xl:hidden p-1.5 -ml-1.5 text-ink-soft hover:bg-sage-pale rounded-lg transition-colors" onClick={() => setIsSidebarOpen(true)}>
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
             </button>
             <div className="overflow-hidden">
@@ -369,7 +375,9 @@ export default function Layout({ children }) {
               <span>{isSparkDoneToday ? '✓' : '⚡'}</span>
               {isSparkDoneToday ? 'Spark Captured' : 'Daily Spark'}
             </button>
-
+<Link to="/chat" className="flex items-center gap-2 px-4 py-2 lg:px-5 lg:py-2.5 text-xs lg:text-sm font-bold bg-[#1A1F1C] text-white rounded-2xl hover:bg-black transition-all shadow-md active:scale-95 whitespace-nowrap">
+              <span>🤖</span> Chat
+            </Link>
           
           </div>
         </header>
