@@ -588,7 +588,7 @@ const toggleTask = (id) => {
 
                   <span className="cursor-pointer w-4 h-4 rounded-full border border-sage-dark/30 text-sage-dark flex items-center justify-center text-[8px] font-bold hover:bg-sage hover:text-white transition-all">i</span>
 
-                  <div className="absolute bottom-full right-0 mb-2 w-52 p-3 bg-ink text-white text-[9px] rounded-xl opacity-0 group-hover/tip:opacity-100 translate-y-1 group-hover/tip:translate-y-0 transition-all pointer-events-none z-50 leading-relaxed shadow-xl border border-white/10">
+                  <div className="absolute bottom-full right-0 mb-2 w-52 p-3 bg-ink text-white text-[12px] rounded-xl opacity-0 group-hover/tip:opacity-100 translate-y-1 group-hover/tip:translate-y-0 transition-all pointer-events-none z-50 leading-relaxed shadow-xl border border-white/10">
 
                     <p className="font-bold mb-1 text-sage">How it works:</p>
 

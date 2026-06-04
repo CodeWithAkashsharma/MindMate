@@ -215,7 +215,7 @@ export default function AudioJournalCard() {
                 <h3 className="text-lg sm:text-xl font-serif text-[#1A1F1C] flex items-center justify-center sm:justify-start gap-2 mb-1">
                   Too overwhelmed to type ?<Sparkles size={16} className="text-[#D4A72C]" />
                 </h3>
-                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed truncate px-2 sm:px-0">
+                <p className=" hidden sm:block text-xs sm:text-sm text-gray-500 leading-relaxed truncate px-2 sm:px-0">
                   Tap the mic and let your thoughts flow naturally into your
                   private voice journal.
                 </p>
