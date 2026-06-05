@@ -238,13 +238,15 @@ export default function Layout({ children }) {
         
         {/* Logo Area */}
         <div className="p-6 pb-5 border-b border-sage-light/20 flex items-center justify-between">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center ">
           
  <img 
       src={logoImg} 
       alt="logo" 
-      className="w-13 h-13 object-cover"
+      className="w-15 h-15 rounded-xl object-contain"
     />
+  
+
           
             <div>
               <div className="font-serif text-xl tracking-tight text-ink">MindMate</div>
