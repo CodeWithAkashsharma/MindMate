@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { addJournal, getJournals } = require('../controllers/JournalController');
-const Journal = require('../models/Journal'); // Use your actual filename here
+const Journal = require('../models/journal'); // Use your actual filename here
 
 // Bring in the Bouncer
 const { protect } = require('../middleware/AuthMiddleware');

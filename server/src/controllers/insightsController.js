@@ -1,5 +1,5 @@
 const Mood = require('../models/Mood');
-const Journal = require('../models/Journal'); 
+const Journal = require('../models/journal'); 
 const SleepLog = require('../models/SleepLog');
 const MeditationSession = require('../models/MeditationSession');
 const BreathingSession = require('../models/BreathingSession');
