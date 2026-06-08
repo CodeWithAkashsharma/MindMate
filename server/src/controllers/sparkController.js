@@ -1,6 +1,6 @@
 const SparkProgress = require('../models/SparkProgress');
 const DailySpark = require('../models/DailySpark');
-const User = require('../models/User');
+const User = require('../models/user');
 
 // --- 1. GET TODAY's SPARK ---
 const getTodaySpark = async (req, res) => {
