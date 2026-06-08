@@ -1,6 +1,6 @@
 const express = require("express");
 const { getChatResponse, getChatHistory, clearChatHistory } = require("../controllers/chatController");
-const { protect } = require("../middleware/authMiddleware"); // Or whatever your auth middleware is named
+const { protect } = require("../middleware/AuthMiddleware"); // Or whatever your auth middleware is named
 
 const router = express.Router();
 

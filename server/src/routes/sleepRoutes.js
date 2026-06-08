@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const SleepLog = require('../models/SleepLog');
-const { protect } = require('../middleware/authMiddleware'); // Your auth middleware
+const { protect } = require('../middleware/AuthMiddleware'); // Your auth middleware
 
 // Helper to calculate hours slept
 const calculateSleepDuration = (bed, wake) => {

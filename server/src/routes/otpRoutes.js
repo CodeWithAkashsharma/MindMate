@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/AuthMiddleware');
 const { sendEmailOtp, verifyEmailOtp } = require('../controllers/otpController');
 
 // Securely mount localized OTP routes behind authentication middleware

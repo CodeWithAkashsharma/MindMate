@@ -4,7 +4,7 @@ const { addJournal, getJournals } = require('../controllers/JournalController');
 const Journal = require('../models/Journal'); // Use your actual filename here
 
 // Bring in the Bouncer
-const { protect } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/AuthMiddleware');
 
 // Lock down both the GET and POST routes
 router.route('/')

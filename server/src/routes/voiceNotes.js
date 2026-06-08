@@ -6,7 +6,7 @@ const VoiceNote = require('../models/VoiceNote');
 
 // IMPORT YOUR AUTH MIDDLEWARE HERE
 // (Change the path to match wherever your middleware file is located)
-const {protect} = require('../middleware/authMiddleware'); 
+const {protect} = require('../middleware/AuthMiddleware'); 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 // ... cloudinary config and multer setup stays exactly the same ...

@@ -1,7 +1,7 @@
 // routes/meditationRoutes.js
 const router = require('express').Router();
 const MeditationSession = require('../models/MeditationSession');
-const { protect } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/AuthMiddleware');
 
 // 1. SAVE SESSION
 router.post('/save', protect, async (req, res) => {

@@ -1,7 +1,7 @@
 // routes/breathing.js
 const router = require('express').Router();
 const BreathingSession = require('../models/BreathingSession');
-const { protect } = require('../middleware/authMiddleware');// Assuming you have auth middleware
+const { protect } = require('../middleware/AuthMiddleware');// Assuming you have auth middleware
 
 // GET LATEST 10 SESSIONS
 // GET LATEST 10 SESSIONS

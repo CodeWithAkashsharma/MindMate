@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const { getUserProfile,updateProfile } = require('../controllers/userController'); // Import the controller
-const { protect } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/AuthMiddleware');
 
 // The frontend is specifically asking for /profile
 router.get('/profile', protect, getUserProfile);
