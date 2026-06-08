@@ -1,4 +1,4 @@
-const Journal = require('../models/Journal');
+const Journal = require('../models/journal');
 
 // --- CREATE A NEW JOURNAL ENTRY ---
 const addJournal = async (req, res) => {
