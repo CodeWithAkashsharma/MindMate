@@ -57,7 +57,7 @@ const [suggestion, setSuggestion] = useState({ text: "", actionType: "meditation
     setDevLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/sparks/complete', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/api/sparks/complete`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -82,7 +82,7 @@ useEffect(() => {
       try {
         const token = localStorage.getItem('token');
         
-        const resData = await axios.get('http://localhost:5000/api/insights/weekly', {
+        const resData = await axios.get(`${import.meta.env.VITE_BACKEND_API}/api/insights/weekly`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -103,7 +103,7 @@ useEffect(() => {
         const sleep = resData.data.wellnessBreakdown.find(b => b.label === "Sleep")?.score || 0;
         const mindfulness = resData.data.wellnessBreakdown.find(b => b.label === "Mindfulness")?.score || 0;
 
-        const tipRes = await axios.post('http://localhost:5000/api/insights/dashboard-tip', {
+        const tipRes = await axios.post(`${import.meta.env.VITE_BACKEND_API}/api/insights/dashboard-tip`, {
           avgMood: resData.data.kpis.avgMood,
           productivityScore: productivity,
           sleepScore: sleep,
@@ -153,7 +153,7 @@ useEffect(() => {
 
         const token = localStorage.getItem('token');
 
-        const res = await fetch('http://localhost:5000/api/users/profile', {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_API}/api/users/profile`, {
 
           headers: { 'Authorization': `Bearer ${token}` }
 
@@ -270,9 +270,9 @@ useEffect(() => {
       try {
         // 🔥 We fetch Users, Journals, and Moods ALL AT THE SAME TIME for blazing fast loading
         const [userRes, journalRes, moodRes] = await Promise.all([
-          fetch('http://localhost:5000/api/users/profile', { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch('http://localhost:5000/api/journals', { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch('http://localhost:5000/api/moods', { headers: { 'Authorization': `Bearer ${token}` } })
+          fetch(`${import.meta.env.VITE_BACKEND_API}/api/users/profile`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${import.meta.env.VITE_BACKEND_API}/api/journals`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${import.meta.env.VITE_BACKEND_API}/api/moods`, { headers: { 'Authorization': `Bearer ${token}` } })
         ]);
 
         // 1. PROCESS USER DATA (Initial Points & Streak)

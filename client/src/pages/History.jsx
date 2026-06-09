@@ -45,14 +45,14 @@ export default function History() {
       try {
         const [journalResponse, voiceResponse] =
           await Promise.all([
-            fetch('http://localhost:5000/api/journals', {
+            fetch(`${import.meta.env.VITE_BACKEND_API}/api/journals`, {
               headers: {
                 Authorization: `Bearer ${token}`,
               },
             }),
 
             fetch(
-              'http://localhost:5000/api/voicenotes/all',
+              `${import.meta.env.VITE_BACKEND_API}/api/voicenotes/all`,
               {
                 headers: {
                   Authorization: `Bearer ${token}`,
@@ -159,7 +159,7 @@ const togglePlay = (id, url) => {
     if (itemToDelete.audioUrl) {
 
       const response = await fetch(
-        `http://localhost:5000/api/voicenotes/${idToDelete}`,
+        `${import.meta.env.VITE_BACKEND_API}/api/voicenotes/${idToDelete}`,
         {
           method: 'DELETE',
           headers: {
@@ -181,7 +181,7 @@ const togglePlay = (id, url) => {
       // =========================
 
       const response = await fetch(
-        `http://localhost:5000/api/journals/${idToDelete}`,
+        `${import.meta.env.VITE_BACKEND_API}/api/journals/${idToDelete}`,
         {
           method: 'DELETE',
           headers: {
@@ -259,7 +259,7 @@ setEntries((prev) =>
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/journals/${selectedId}`,
+        `${import.meta.env.VITE_BACKEND_API}/api/journals/${selectedId}`,
         {
           method: 'PUT',
           headers: {

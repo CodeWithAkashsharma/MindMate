@@ -13,7 +13,7 @@ export default function QuickActionWidget() {
         if (!token) return;
 
         // Note: Change localhost:5000 to match your backend port if it's different
-        const res = await axios.get('http://localhost:5000/api/quick-actions/tasks', {
+        const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/api/quick-actions/tasks`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -41,7 +41,7 @@ const toggleAction = async (actionId) => {
     try {
       const token = localStorage.getItem('token');
       // Ensure the URL correctly targets the toggle endpoint
-      await axios.put(`http://localhost:5000/api/quick-actions/toggle/${actionId}`, {}, {
+      await axios.put(`${import.meta.env.VITE_BACKEND_API}/api/quick-actions/toggle/${actionId}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
     } catch (err) {

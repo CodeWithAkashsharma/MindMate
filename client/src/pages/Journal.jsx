@@ -46,7 +46,7 @@ const [showSuccessModal, setShowSuccessModal] = useState(false);
       
       const token = localStorage.getItem('token');
       try {
-        const response = await fetch('http://localhost:5000/api/journals', {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/api/journals`, {
           headers: {
             'Authorization': `Bearer ${token}` // Sends your login token
           }
@@ -78,7 +78,7 @@ const handleSave = async () => {
   setIsSaving(true);
 
   try {
-    const response = await fetch('http://localhost:5000/api/journals', {
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/api/journals`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

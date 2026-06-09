@@ -38,7 +38,7 @@ export default function AudioJournalCard() {
       const token = localStorage.getItem('token');
 
       const res = await axios.get(
-        'http://localhost:5000/api/voicenotes/recent',
+        `${import.meta.env.VITE_BACKEND_API}/api/voicenotes/recent`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -138,7 +138,7 @@ export default function AudioJournalCard() {
       const token = localStorage.getItem('token');
 
       await axios.post(
-        'http://localhost:5000/api/voicenotes/upload',
+        `${import.meta.env.VITE_BACKEND_API}/api/voicenotes/upload`,
         formData,
         {
           headers: {

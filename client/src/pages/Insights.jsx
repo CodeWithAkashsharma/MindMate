@@ -26,7 +26,7 @@ useEffect(() => {
         const token = localStorage.getItem('token');
         
         // 1. Fetch your main dashboard metrics
-        const res = await axios.get('http://localhost:5000/api/insights/weekly', {
+        const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/api/insights/weekly`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -69,7 +69,7 @@ const autoGenerateSummary = async (freshData, token, summaryKey, timeKey) => {
       const sleep = freshData.wellnessBreakdown.find(b => b.label === "Sleep")?.score || 0;
       const mindfulness = freshData.wellnessBreakdown.find(b => b.label === "Mindfulness")?.score || 0;
 
-      const res = await axios.post('http://localhost:5000/api/insights/generate-ai', {
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_API}/api/insights/generate-ai`, {
         avgMood: freshData.kpis.avgMood,
         productivityScore: productivity,
         sleepScore: sleep,

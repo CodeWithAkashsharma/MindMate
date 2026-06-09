@@ -32,8 +32,8 @@ export default function Assessment() {
 
         // We fetch BOTH the history and the user profile live
         const [historyRes, profileRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/assessment/history', { headers }),
-          axios.get('http://localhost:5000/api/users/profile', { headers })
+          axios.get(`${import.meta.env.VITE_BACKEND_API}/api/assessment/history`, { headers }),
+          axios.get(`${import.meta.env.VITE_BACKEND_API}/api/users/profile`, { headers })
         ]);
 
         // 1. Check Dev Status DIRECTLY from the backend response
@@ -172,7 +172,7 @@ export default function Assessment() {
         answers: answers 
       };
 
-      const res = await axios.post('http://localhost:5000/api/assessment/save', newEntry, {
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_API}/api/assessment/save`, newEntry, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

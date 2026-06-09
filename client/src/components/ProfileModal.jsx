@@ -52,7 +52,7 @@ export default function ProfileModal({ isOpen, onClose, currentName, onUpdateSuc
         setSendingOtp(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.post('http://localhost:5000/api/otp/send-email-otp', {
+            const res = await axios.post(`${import.meta.env.VITE_BACKEND_API}/api/otp/send-email-otp`, {
                 newEmail: profileForm.newEmail
             }, { headers: { Authorization: `Bearer ${token}` } });
 
@@ -76,7 +76,7 @@ export default function ProfileModal({ isOpen, onClose, currentName, onUpdateSuc
         setVerifyingOtp(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.put('http://localhost:5000/api/otp/verify-email-otp', {
+            const res = await axios.put(`${import.meta.env.VITE_BACKEND_API}/api/otp/verify-email-otp`, {
                 otp: otpCode
             }, { headers: { Authorization: `Bearer ${token}` } });
             
@@ -107,7 +107,7 @@ export default function ProfileModal({ isOpen, onClose, currentName, onUpdateSuc
         setUpdatingProfile(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.put('http://localhost:5000/api/users/update-profile', {
+            const res = await axios.put(`${import.meta.env.VITE_BACKEND_API}/api/users/update-profile`, {
                 name: profileForm.name,
                 currentPassword: profileForm.currentPassword,
                 newPassword: profileForm.newPassword
