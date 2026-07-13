@@ -352,7 +352,7 @@ export default function Layout({ children }) {
         </div>
       </aside>
       {/* MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         <header className="bg-surface border-b border-sage-light/20 px-4 lg:px-8 h-16 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-3 lg:gap-4">
             <button className="xl:hidden p-1.5 -ml-1.5 text-ink-soft hover:bg-sage-pale rounded-lg transition-colors" onClick={() => setIsSidebarOpen(true)}>
@@ -384,7 +384,7 @@ export default function Layout({ children }) {
           </div>
         </header>
 
-        <main className="p-4 lg:p-8 flex-1 overflow-x-hidden">
+        <main className="p-4  lg:p-8 flex-1 overflow-x-hidden">
           {children}
         </main>
       </div>
