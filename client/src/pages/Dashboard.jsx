@@ -913,7 +913,7 @@ Mood Activity
 
 
 
-  <div className="flex-1 flex flex-col justify-center lg:justify-evenly xl;justify-center gap-5">
+  <div className="flex-1 flex flex-col justify-center lg:justify-evenly xl:justify-center gap-5">
 
 
 
@@ -931,7 +931,7 @@ Mood Activity
 
 
 
-        <span className= " w-8 h-8 flex flex-col items-center justify-center  text-[10px] font-medium text-ink-muted leading-none overflow-hidden text-xs font-medium text-ink-muted  group-hover:text-sage-dark transition-colors">
+        <span className= " w-8 h-8 flex flex-col items-center justify-center  text-[10px] font-medium text-ink-muted leading-none overflow-hidden  font-medium text-ink-muted  group-hover:text-sage-dark transition-colors">
 
           {item.label}
 
