@@ -51,7 +51,7 @@ export default function Breathing() {
       try {
         const token = localStorage.getItem('token');
         const res = await axios.get(
-          `${import.meta.env.VITE_BACKEND_API}/api/breathing/history`,
+          `${import.meta.env.VITE_BACKEND_API }/api/breathing/history`,
           {
             headers: {
               Authorization: `Bearer ${token}`
@@ -81,7 +81,7 @@ export default function Breathing() {
 
       try {
         const savedSession = await axios.post(
-          `${import.meta.env.VITE_BACKEND_API}/api/breathing/save`,
+          `${import.meta.env.VITE_BACKEND_API }/api/breathing/save`,
           sessionData,
           {
             headers: {

@@ -110,7 +110,7 @@ export default function Landing() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/api/auth/login`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_API }/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email, password: formData.password }),
@@ -137,7 +137,7 @@ export default function Landing() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/api/auth/register`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_API }/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

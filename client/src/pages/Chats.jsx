@@ -28,7 +28,7 @@ const Chat = () => {
     const fetchHistory = async () => {
       try {
         const token = localStorage.getItem("token"); // Adjust if your token is stored differently
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_API}/api/chat/history`, {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_API }/api/chat/history`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();
@@ -60,7 +60,7 @@ const Chat = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_API}/api/chat/message`, {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_API }/api/chat/message`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -106,7 +106,7 @@ const Chat = () => {
     // 2. Clear from database
     try {
       const token = localStorage.getItem("token");
-      await fetch(`${import.meta.env.VITE_BACKEND_API}/api/chat/clear`, {
+      await fetch(`${import.meta.env.VITE_BACKEND_API }/api/chat/clear`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });

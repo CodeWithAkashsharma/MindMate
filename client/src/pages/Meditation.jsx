@@ -103,7 +103,7 @@ const handleComplete = async () => {
       const token = localStorage.getItem('token');
       
       // Save session to backend
-      await axios.post(`${import.meta.env.VITE_BACKEND_API}/api/meditation/save`, {
+      await axios.post(`${import.meta.env.VITE_BACKEND_API }/api/meditation/save`, {
         duration: durationEarned,
       }, { 
         headers: { Authorization: `Bearer ${token}` } 
@@ -135,7 +135,7 @@ const handleComplete = async () => {
   const [analytics, setAnalytics] = useState({ dailyStats: [], totalTime: 0, avgSession: 0 });
 
   const fetchAnalytics = async () => {
-    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/api/meditation/analytics`, {
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API }/api/meditation/analytics`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     });
     setAnalytics(res.data);

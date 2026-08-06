@@ -52,7 +52,7 @@ export default function Mood() {
   const fetchMoodHistory = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_API}/api/moods`, {
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_API }/api/moods`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -83,7 +83,7 @@ export default function Mood() {
     const token = localStorage.getItem('token');
 
     try {
-      await axios.post(`${import.meta.env.VITE_BACKEND_API}/api/moods`, 
+      await axios.post(`${import.meta.env.VITE_BACKEND_API }/api/moods`, 
         { score, emotions: selectedEmotions, notes },
         { headers: { Authorization: `Bearer ${token}` } }
       );

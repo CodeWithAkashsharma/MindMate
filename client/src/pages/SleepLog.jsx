@@ -39,7 +39,7 @@ export default function SleepLog() {
 const handleSaveLog = async () => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${import.meta.env.VITE_BACKEND_API}/api/sleep/save`, {
+      await axios.post(`${import.meta.env.VITE_BACKEND_API }/api/sleep/save`, {
         bedTime, wakeTime, quality, factors
       }, { headers: { Authorization: `Bearer ${token}` } });
 
@@ -75,7 +75,7 @@ const [analytics, setAnalytics] = useState({
   const fetchAnalytics = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/api/sleep/analytics`, {
+      const res = await axios.get(`${import.meta.env.VITE_BACKEND_API }/api/sleep/analytics`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAnalytics(res.data);

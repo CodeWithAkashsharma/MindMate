@@ -66,7 +66,7 @@ export default function Layout({ children }) {
   const handleSparkComplete = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/api/sparks/complete`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_API }/api/sparks/complete`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -92,7 +92,7 @@ export default function Layout({ children }) {
         console.log("📢 Layout Broadcasted New Points:", data.points);
 
         if (devMode) {
-          const sparkRes = await fetch(`${import.meta.env.VITE_BACKEND_API}/api/sparks/today?devMode=true`, { 
+          const sparkRes = await fetch(`${import.meta.env.VITE_BACKEND_API }/api/sparks/today?devMode=true`, { 
             headers: { 'Authorization': `Bearer ${token}` } 
           });
           if (sparkRes.ok) {
@@ -131,9 +131,9 @@ export default function Layout({ children }) {
 
       try {
         const [userRes, journalsRes, sparkRes] = await Promise.all([
-          fetch(`${import.meta.env.VITE_BACKEND_API}/api/users/profile`, { headers }),
-          fetch(`${import.meta.env.VITE_BACKEND_API}/api/journals`, { headers }),
-          fetch(`${import.meta.env.VITE_BACKEND_API}/api/sparks/today?devMode=${devMode}`, { headers })
+          fetch(`${import.meta.env.VITE_BACKEND_API }/api/users/profile`, { headers }),
+          fetch(`${import.meta.env.VITE_BACKEND_API }/api/journals`, { headers }),
+          fetch(`${import.meta.env.VITE_BACKEND_API }/api/sparks/today?devMode=${devMode}`, { headers })
         ]);
 
         if (userRes.ok) {
